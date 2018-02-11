@@ -48,7 +48,6 @@
     }
     .scrollButton{
       width: 15%;
-      background: #ccc;
       transition: box-shadow 2s;
     }
     #container{
@@ -68,7 +67,7 @@
       Select a Painting
     </div>
     <div id="columnsContainer">
-      <div class="scrollButton" style="order:l;"  gazeAction = "testGazeAction" gazeOverClass='gazingOver' gazeAware>
+      <div class="scrollButton" style="order:l;">
       </div>
 
         <div id="gridContainer">
@@ -84,7 +83,7 @@
             </div>
           </div>
 
-          <div class="item" style="background-image:url(bosch.jpg)"  gazeAction = "openBosch" gazeOverClass='gazingOver' gazeAware>
+          <div class="item" style="background-image:url(bosch.jpg)"  gazeAction = "openBruegel" gazeOverClass='gazingOver' gazeAware>
             <div class="item_content" >
               <div class="item_title">
                 The Triumph of Death
@@ -95,13 +94,13 @@
             </div>
           </div>
 
-          <div style="background:gray;" class="item"  gazeAction = "testGazeAction" gazeOverClass='gazingOver' gazeAware>
+          <div style="background:gray;" class="item"  gazeAction = "openMiro" gazeOverClass='gazingOver' gazeAware>
           </div>
-          <div style="background:gray;"  class="item"  gazeAction = "testGazeAction" gazeOverClass='gazingOver' gazeAware>
+          <div style="background:gray;"  class="item"  gazeAction = "openMiro" gazeOverClass='gazingOver' gazeAware>
           </div>
         </div>
 
-      <div class="scrollButton" style="order:3;" gazeAction = "testGazeAction" gazeOverClass='gazingOver' gazeAware>
+      <div class="scrollButton" style="order:3;">
       </div>
 
     </div>
@@ -138,11 +137,17 @@
     setInterval(updateGaze, 10);
 
     function testGazeAction(){
-      console.log('Gaze');
+      console.log("test Gaze Action");
+    }
+
+    function openBruegel(){
+      console.log('Open Bruegel');
+      //ipc.send('open', 'bruegel_triumphofdeath');
     }
 
     function openMiro(){
-      console.log('OpeningMiro');
+      ipc.send('open', 'miro_tilledfields');
+      console.log('Open Miro');
     }
 
     function updateGaze() {

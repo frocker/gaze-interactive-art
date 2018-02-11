@@ -48,8 +48,8 @@ var imageDimensions = {width:4096, height:2884, aspectratio: undefined};
 imageDimensions.aspectratio = imageDimensions.width/imageDimensions.height;
 var gazePoints = [
         {x: 1200, y: 700, r :260, dwelltime: 0, text: "Primo de Rivera, who assumed Spain’s dictatorship in 1923, instituted strict measures to repress Catalan separatism. By depicting the Catalan and French flags together, across the border post from the Spanish flag, Miró announced his allegiance to the Catalan cause.", enabled: true},
-        {x: 3660, y: 1360, r: 360, dwelltime: 0, text: "The stylized figure with a plow has its source in the prehistoric cave paintings of Altamira, which Miró knew wel", enabled: true},
-        {x: 2000, y: 600, r: 300, dwelltime: 0, text: "item 5", enabled: true}
+        {x: 3660, y: 1360, r: 360, dwelltime: 0, text: "The stylized figure with a plow has its source in the prehistoric cave paintings of Altamira, which Miró knew well.", enabled: true},
+        {x: 2800, y: 1100, r: 300, dwelltime: 0, text: "Miró found something alive and magical in all things: the gigantic ear affixed to the trunk of the tree reflects his belief that every object contains a living soul.", enabled: true}
     ];
 
 
@@ -69,7 +69,7 @@ if(viewport.aspectratio<imageDimensions.aspectratio){
   canvas.width = imageDimensions.width * (canvas.height/imageDimensions.height);
   renderedScaleFactor = canvas.height/imageDimensions.height;
 }
-
+var canvasMargin = canvas.getBoundingClientRect().left;
 var imageDataDefault;
 var pixelsDefault;
 var numPixels;
@@ -108,7 +108,7 @@ var then = Date.now();
 var interval = 1000/fps;
 var delta;
 
-var DWELL_TIME = 1000;
+var DWELL_TIME = 2000;
 
 function render() {
   now = Date.now();
@@ -139,7 +139,7 @@ function render() {
             //set visibility to true
             document.getElementById("infoText").innerHTML=gazePoints[i].text;
             document.getElementById("infoText").style.visibility="visible";
-            setTimeout(function() { hideInfoText(); }, 10000);
+            setTimeout(function() { hideInfoText(); }, 8000);
           }
         }
       }
@@ -165,7 +165,7 @@ function clipArc(context, x, y, r) {
 
     context.arc(x, y, r, 0, 2 * Math.PI);
     //Check if mouse is in Path
-    if (context.isPointInPath(gazePosition.x, gazePosition.y)) {
+    if (context.isPointInPath(gazePosition.x-canvasMargin, gazePosition.y)) {
       var renderPoint = false;
     } else {
       var renderPoint = true;

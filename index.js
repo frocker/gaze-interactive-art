@@ -46,3 +46,8 @@ app.on('ready', () => {
     //Loaded, surface meno
   });
 });
+
+ipc.on('open', function (e, painting) {
+  console.log("Opening: " + painting);
+  mainWindow.loadURL(path.join('file://', __dirname, 'index.html?painting='+painting));
+});
