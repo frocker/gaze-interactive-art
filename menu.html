@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    body{
+      background:black;
+    }
+    #header{
+      width:100%;
+      color:white;
+      text-align: center;
+      font-size:30pt;
+      margin: 10px 0 0 0;
+      border-bottom: white 3px solid;
+    }
+
+    #columnsContainer{
+      display: flex;
+      flex: 1;
+    }
+
+    #gridContainer{
+      flex: 1;
+      order: 2;
+      display:grid;
+      grid-template-columns: 50% 50%;
+    }
+    .item{
+      transition: box-shadow 2s;
+      position:relative;
+      box-shadow: inset 0 0 0 10px black;
+      background-size:cover;
+      overflow:hidden;
+    }
+    .item_content{
+      width:100%;
+      color:white;
+      background-color:rgba(0, 0, 0, 0.5);
+      padding:20px;
+      bottom:0;
+      position:absolute;
+    }
+    .item_title{
+      font-size:28pt;
+    }
+    .item_author{
+      font-size:20pt;
+    }
+    .scrollButton{
+      width: 15%;
+      background: #ccc;
+      transition: box-shadow 2s;
+    }
+    #container{
+      display: flex;
+      min-height: 100vh;
+      flex-direction: column;
+    }
+    .gazingOver{
+      box-shadow: inset 0 0 0 40px black;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="container">
+    <div id="header">
+      Select a Painting
+    </div>
+    <div id="columnsContainer">
+      <div class="scrollButton" style="order:l;"  gazeAction = "testGazeAction" gazeOverClass='gazingOver' gazeAware>
+      </div>
+
+        <div id="gridContainer">
+
+          <div class="item" style="background-image:url(miro.jpg)"  gazeAction = "openMiro" gazeOverClass='gazingOver' gazeAware>
+            <div class="item_content" >
+              <div class="item_title">
+                The Tilled Field
+              </div>
+              <div class = "item_author">
+                Joan Miró
+              </div>
+            </div>
+          </div>
+
+          <div class="item" style="background-image:url(bosch.jpg)"  gazeAction = "openBosch" gazeOverClass='gazingOver' gazeAware>
+            <div class="item_content" >
+              <div class="item_title">
+                The Triumph of Death
+              </div>
+              <div class = "item_author">
+                Pieter Bruegel
+              </div>
+            </div>
+          </div>
+
+          <div style="background:gray;" class="item"  gazeAction = "testGazeAction" gazeOverClass='gazingOver' gazeAware>
+          </div>
+          <div style="background:gray;"  class="item"  gazeAction = "testGazeAction" gazeOverClass='gazingOver' gazeAware>
+          </div>
+        </div>
+
+      <div class="scrollButton" style="order:3;" gazeAction = "testGazeAction" gazeOverClass='gazingOver' gazeAware>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+
+  //Get Gaze coordinates
+   var ipc = require('electron').ipcRenderer;
+    ipc.on('gaze-pos', (event, arg) => {
+      if(arg.timestamp )
+      gazePosition.x = arg.x;
+      gazePosition.y = arg.y;
+    });
+    var gazePosition = {x : 0, y: 0};
+    var gazeAwareElements = [];
+
+    function setupGaze(){
+      var arr_elms = [];
+      arr_elms = document.body.getElementsByTagName("*");
+      var elms_len = arr_elms.length;
+
+      for (var i = 0; i < elms_len; i++) {
+        if(arr_elms[i].getAttribute("gazeAware") != null){
+
+         gazeAwareElements.push({'element': arr_elms[i], 'dwell':false, 'dwellTimeout': null});
+         console.log( arr_elms[i].getBoundingClientRect());
+         console.log({'element': arr_elms[i], 'dwell':false, 'dwellTimeout': null});
+        }
+      }
+    }
+
+    setupGaze();
+    setInterval(updateGaze, 10);
+
+    function testGazeAction(){
+      console.log('Gaze');
+    }
+
+    function openMiro(){
+      console.log('OpeningMiro');
+    }
+
+    function updateGaze() {
+      for (var i = 0; i < gazeAwareElements.length; i++) {
+        var el = gazeAwareElements[i].element;
+        var elRect = el.getBoundingClientRect();
+        var hoverClass = el.getAttribute("gazeOverClass");
+        var actionFunction = el.getAttribute("gazeAction");
+
+        var hoverClass = el.getAttribute("gazeOverClass");
+        if(gazePosition.x > elRect.left
+          && gazePosition.x < elRect.left + elRect.width
+          && gazePosition.y > elRect.top
+          && gazePosition.y < elRect.top + elRect.height){
+            //Gazing
+            if(gazeAwareElements[i].dwell){
+              //No change
+            } else{
+              gazeAwareElements[i].dwell=true;
+              el.className += " " + hoverClass;
+              gazeAwareElements[i].dwellTimeout = setTimeout(function(){window[actionFunction]()}, 2000);
+            }
+          } else {
+            //Not Gazing
+            if(gazeAwareElements[i].dwell){
+              gazeAwareElements[i].dwell=false;
+              el.classList.remove(hoverClass);
+               clearTimeout(gazeAwareElements[i].dwellTimeout);
+            }
+          }
+      }
+    }
+  </script>
+</body>

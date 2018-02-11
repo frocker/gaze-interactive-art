@@ -1,44 +1,75 @@
 <!DOCTYPE html>
 <html>
-<body style="margin:0;overflow:hidden;">
+<head>
+  <style>
+    #infoText{
+      width:100%;
+      box-sizing: border-box;
+      padding:20px;
+      position:absolute;
+      font-size:20pt;
+      color:white;
+      background-color:rgba(0, 0, 0, 0.5);
+      text-align:center;
+      visibility:hidden;
+    }
+  </style>
 
-<canvas id="canvas" style='background-image:url(bosch.jpg)'>
+</head>
+
+<body style="margin:0;background:black;">
+<div id="infoText"></div>
+<canvas id="canvas" style="background-image:url(miro.jpg);background-size:contain;margin-left:auto;margin-right:auto;display:block;">
 </canvas>
 
+
+
 <script>
+//Get Gaze coordinates
+var ipc = require('electron').ipcRenderer;
+ipc.on('gaze-pos', (event, arg) => {
+  if(arg.timestamp )
+  gazePosition.x = arg.x;
+  gazePosition.y = arg.y;
+});
+var gazePosition = {x : 0, y: 0};
+
+var DEBUG = false;
+
 var canvas = document.getElementById("canvas"),
     ctx = canvas.getContext("2d");
 
-canvas.width = 1920;
-canvas.height = 1080;
+var viewport = {width:undefined, height:undefined, aspectratio: undefined};
+viewport.width = window.innerWidth;
+viewport.height = window.innerHeight;
+viewport.aspectratio = viewport.width/viewport.height;
 
-var mousePos = {x : 0, y: 0};
-
+var imageDimensions = {width:4096, height:2884, aspectratio: undefined};
+imageDimensions.aspectratio = imageDimensions.width/imageDimensions.height;
 var gazePoints = [
-        {x: 800, y: 200, r :60},
-        {x: 1600, y: 80, r: 60},
-        {x: 300, y: 90, r: 60},
-        {x: 400, y: 800, r: 60},
-        {x: 1600, y: 600, r: 300}
+        {x: 1200, y: 700, r :260, dwelltime: 0, text: "Primo de Rivera, who assumed Spain’s dictatorship in 1923, instituted strict measures to repress Catalan separatism. By depicting the Catalan and French flags together, across the border post from the Spanish flag, Miró announced his allegiance to the Catalan cause.", enabled: true},
+        {x: 3660, y: 1360, r: 360, dwelltime: 0, text: "The stylized figure with a plow has its source in the prehistoric cave paintings of Altamira, which Miró knew wel", enabled: true},
+        {x: 2000, y: 600, r: 300, dwelltime: 0, text: "item 5", enabled: true}
     ];
-
-function getMousePos(canvas, evt) {
-  var rect = canvas.getBoundingClientRect();
-  return {
-    x: evt.clientX - rect.left,
-    y: evt.clientY - rect.top
-  };
-}
-
-canvas.addEventListener('mousemove', function(evt) {
-  mousePos = getMousePos(canvas, evt);
-  /*var message = 'Mouse position: ' + mousePos.x + ',' + mousePos.y;
-  console.log(message);*/
-  }, false);
 
 
 var imageDefault = new Image();
-imageDefault.src = "bosch.jpg";
+imageDefault.src = "miro.jpg";
+var renderedScaleFactor;
+console.log(viewport);
+console.log(imageDimensions);
+if(viewport.aspectratio<imageDimensions.aspectratio){
+  //Fit width
+  canvas.width = viewport.width;
+  canvas.height = imageDimensions.height * (canvas.width/imageDimensions.width);
+  renderedScaleFactor = canvas.width/imageDimensions.width;
+} else {
+  //Fit Height
+  canvas.height = viewport.height;
+  canvas.width = imageDimensions.width * (canvas.height/imageDimensions.height);
+  renderedScaleFactor = canvas.height/imageDimensions.height;
+}
+
 var imageDataDefault;
 var pixelsDefault;
 var numPixels;
@@ -48,10 +79,9 @@ var imageDataModulated;
 var pixelsModulated;
 
 imageDefault.onload = function(){
-
     //Do Initial image setup and modulations
     console.log("ImgDefault Load");
-    ctx.drawImage(imageDefault,0,0);
+    ctx.drawImage(imageDefault,0,0, canvas.width, canvas.height);
     imageDataDefault = ctx.getImageData(0, 0, canvas.width, canvas.height);
     imageDataModulated = ctx.getImageData(0, 0, canvas.width, canvas.height);
     pixelsDefault = imageDataDefault.data;
@@ -59,9 +89,9 @@ imageDefault.onload = function(){
     pixelsModulated  = imageDataModulated.data;
 
     for (var i = 0; i < numPixels; i++) {
-      pixelsModulated[i*4] = pixelsDefault[i*4] * 1.05; // Red
-      pixelsModulated[i*4+1] = pixelsDefault[i*4+1] * 1.05; // Green
-      pixelsModulated[i*4+2] = pixelsDefault[i*4+2] * 1.05; // Blue
+      pixelsModulated[i*4] = pixelsDefault[i*4] * 1.2; // Red
+      pixelsModulated[i*4+1] = pixelsDefault[i*4+1] * 1.2; // Green
+      pixelsModulated[i*4+2] = pixelsDefault[i*4+2] * 1.2; // Blue
     }
     ctx.putImageData(imageDataModulated, 0, 0);
     imageModulated.src = canvas.toDataURL();
@@ -78,6 +108,8 @@ var then = Date.now();
 var interval = 1000/fps;
 var delta;
 
+var DWELL_TIME = 1000;
+
 function render() {
   now = Date.now();
   delta = now - then;
@@ -89,33 +121,51 @@ function render() {
 
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   if (on){
+    //ToDo: Refractor this so we don't need temp canvas
     var temp = document.createElement('canvas'),
         tx = temp.getContext('2d');
     temp.width = ctx.canvas.width;
     temp.height = ctx.canvas.height;
     for (var i = 0; i < gazePoints.length; i++) {
-      tx.drawImage(imageModulated, 0, 0);
-      if(clipArc(tx, gazePoints[i].x,gazePoints[i].y,gazePoints[i].r)){
-        ctx.drawImage(temp, 0, 0);
+    if(gazePoints[i].enabled){
+        tx.drawImage(imageModulated, 0, 0);
+        if(clipArc(tx, gazePoints[i].x*renderedScaleFactor,gazePoints[i].y*renderedScaleFactor,gazePoints[i].r*renderedScaleFactor)){
+          gazePoints[i].dwelltime = 0;
+          ctx.drawImage(temp, 0, 0);
+        } else {
+          gazePoints[i].dwelltime += delta;
+          if(gazePoints[i].dwelltime>DWELL_TIME){
+            gazePoints[i].enabled=false;
+            //set visibility to true
+            document.getElementById("infoText").innerHTML=gazePoints[i].text;
+            document.getElementById("infoText").style.visibility="visible";
+            setTimeout(function() { hideInfoText(); }, 10000);
+          }
+        }
       }
     }
-    on = true;
-    //Garbage Collection, good job javascript
+    //Garbage Collection, gg javascript
     temp.height = null;
     temp.width = null;
   }
+
   requestAnimationFrame(render);
+}
+
+function hideInfoText(){
+  document.getElementById("infoText").style.visibility="hidden";
+
 }
 
 //Returns true, false, for if point should be rendered.
 function clipArc(context, x, y, r) {
     context.globalCompositeOperation = 'destination-in';
-    context.filter = "blur(25px)";  // "feather"
+    context.filter = "blur(10px)";  // "feather"
     context.beginPath();
 
     context.arc(x, y, r, 0, 2 * Math.PI);
     //Check if mouse is in Path
-    if (context.isPointInPath(mousePos.x, mousePos.y)) {
+    if (context.isPointInPath(gazePosition.x, gazePosition.y)) {
       var renderPoint = false;
     } else {
       var renderPoint = true;
