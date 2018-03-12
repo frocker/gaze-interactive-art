@@ -2,12 +2,17 @@
 <html>
 <head>
   <style>
+  body{
+    font-family:Helvetica;
+    margin:0;
+    background:black;
+  }
     #infoText{
       width:100%;
       box-sizing: border-box;
       padding:20px;
       position:absolute;
-      font-size:20pt;
+      font-size:16pt;
       color:white;
       background-color:rgba(0, 0, 0, 0.5);
       text-align:center;
@@ -17,9 +22,9 @@
 
 </head>
 
-<body style="margin:0;background:black;">
+<body>
 <div id="infoText"></div>
-<canvas id="canvas" style="background-image:url(miro.jpg);background-size:contain;margin-left:auto;margin-right:auto;display:block;">
+<canvas id="canvas" style="background-size:contain;margin-left:auto;margin-right:auto;display:block;">
 </canvas>
 
 
@@ -34,40 +39,50 @@ ipc.on('gaze-pos', (event, arg) => {
 });
 var gazePosition = {x : 0, y: 0};
 
-var DEBUG = false;
+/*Load Image here*/
+let params = (new URL(location)).searchParams;
+var paintingId = params.get("painting");
+console.log(paintingId);
+
+var paintingInfo = require('./paintings/'+paintingId+'.json');
+
+setupGazepoints();
 
 var canvas = document.getElementById("canvas"),
     ctx = canvas.getContext("2d");
+
+canvas.style.backgroundImage = 'url('+paintingInfo.image+')';
 
 var viewport = {width:undefined, height:undefined, aspectratio: undefined};
 viewport.width = window.innerWidth;
 viewport.height = window.innerHeight;
 viewport.aspectratio = viewport.width/viewport.height;
 
-var imageDimensions = {width:4096, height:2884, aspectratio: undefined};
-imageDimensions.aspectratio = imageDimensions.width/imageDimensions.height;
-var gazePoints = [
+/*var imageDimensions = {width:4096, height:2884, aspectratio: undefined};*/
+
+paintingInfo.aspectratio = paintingInfo.width/paintingInfo.height;
+/*var gazePoints = [
         {x: 1200, y: 700, r :260, dwelltime: 0, text: "Primo de Rivera, who assumed Spain’s dictatorship in 1923, instituted strict measures to repress Catalan separatism. By depicting the Catalan and French flags together, across the border post from the Spanish flag, Miró announced his allegiance to the Catalan cause.", enabled: true},
         {x: 3660, y: 1360, r: 360, dwelltime: 0, text: "The stylized figure with a plow has its source in the prehistoric cave paintings of Altamira, which Miró knew well.", enabled: true},
         {x: 2800, y: 1100, r: 300, dwelltime: 0, text: "Miró found something alive and magical in all things: the gigantic ear affixed to the trunk of the tree reflects his belief that every object contains a living soul.", enabled: true}
     ];
-
+*/
 
 var imageDefault = new Image();
-imageDefault.src = "miro.jpg";
+imageDefault.src = paintingInfo.image;
 var renderedScaleFactor;
-console.log(viewport);
-console.log(imageDimensions);
-if(viewport.aspectratio<imageDimensions.aspectratio){
+//console.log(viewport);
+//console.log(imageDimensions);
+if(viewport.aspectratio<paintingInfo.aspectratio){
   //Fit width
   canvas.width = viewport.width;
-  canvas.height = imageDimensions.height * (canvas.width/imageDimensions.width);
-  renderedScaleFactor = canvas.width/imageDimensions.width;
+  canvas.height = paintingInfo.height * (canvas.width/paintingInfo.width);
+  renderedScaleFactor = canvas.width/paintingInfo.width;
 } else {
   //Fit Height
   canvas.height = viewport.height;
-  canvas.width = imageDimensions.width * (canvas.height/imageDimensions.height);
-  renderedScaleFactor = canvas.height/imageDimensions.height;
+  canvas.width = paintingInfo.width * (canvas.height/paintingInfo.height);
+  renderedScaleFactor = canvas.height/paintingInfo.height;
 }
 var canvasMargin = canvas.getBoundingClientRect().left;
 var imageDataDefault;
@@ -99,7 +114,7 @@ imageDefault.onload = function(){
     render();
 }
 
-
+var renderPoints = true;
 var on = true;
 
 var fps = 5;
@@ -119,41 +134,45 @@ function render() {
     then = now - (delta % interval);
   }
 
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  if (on){
-    //ToDo: Refractor this so we don't need temp canvas
-    var temp = document.createElement('canvas'),
-        tx = temp.getContext('2d');
-    temp.width = ctx.canvas.width;
-    temp.height = ctx.canvas.height;
-    for (var i = 0; i < gazePoints.length; i++) {
-    if(gazePoints[i].enabled){
-        tx.drawImage(imageModulated, 0, 0);
-        if(clipArc(tx, gazePoints[i].x*renderedScaleFactor,gazePoints[i].y*renderedScaleFactor,gazePoints[i].r*renderedScaleFactor)){
-          gazePoints[i].dwelltime = 0;
-          ctx.drawImage(temp, 0, 0);
-        } else {
-          gazePoints[i].dwelltime += delta;
-          if(gazePoints[i].dwelltime>DWELL_TIME){
-            gazePoints[i].enabled=false;
-            //set visibility to true
-            document.getElementById("infoText").innerHTML=gazePoints[i].text;
-            document.getElementById("infoText").style.visibility="visible";
-            setTimeout(function() { hideInfoText(); }, 8000);
+ctx.clearRect(0, 0, canvas.width, canvas.height);
+  if (renderPoints){
+    if (on){
+      //ToDo: Refractor this so we don't need temp canvas
+      var temp = document.createElement('canvas'),
+          tx = temp.getContext('2d');
+      temp.width = ctx.canvas.width;
+      temp.height = ctx.canvas.height;
+      for (var i = 0; i < paintingInfo.gazePoints.length; i++) {
+      if(paintingInfo.gazePoints[i].enabled){
+          tx.drawImage(imageModulated, 0, 0);
+          if(clipArc(tx, paintingInfo.gazePoints[i].x*renderedScaleFactor,paintingInfo.gazePoints[i].y*renderedScaleFactor,paintingInfo.gazePoints[i].r*renderedScaleFactor)){
+            paintingInfo.gazePoints[i].dwelltime = 0;
+            ctx.drawImage(temp, 0, 0);
+          } else {
+            paintingInfo.gazePoints[i].dwelltime += delta;
+            if(paintingInfo.gazePoints[i].dwelltime>DWELL_TIME){
+              paintingInfo.gazePoints[i].enabled=false;
+              //set visibility to true
+              document.getElementById("infoText").innerHTML=paintingInfo.gazePoints[i].text;
+              document.getElementById("infoText").style.visibility="visible";
+              renderPoints = false;
+              setTimeout(function() { hideInfoText(); }, 8000);
+            }
           }
         }
       }
+      //Garbage Collection, gg javascript
+      temp.height = null;
+      temp.width = null;
     }
-    //Garbage Collection, gg javascript
-    temp.height = null;
-    temp.width = null;
   }
-
-  requestAnimationFrame(render);
+requestAnimationFrame(render);
+    
 }
 
 function hideInfoText(){
   document.getElementById("infoText").style.visibility="hidden";
+  renderPoints = true;
 
 }
 
@@ -179,6 +198,12 @@ function clipArc(context, x, y, r) {
     return renderPoint;
 }
 
+function setupGazepoints(){
+  for (var i = 0; i < paintingInfo.gazePoints.length; i++) {
+    paintingInfo.gazePoints[i].enabled = true;
+    paintingInfo.gazePoints[i].dwelltime = 0;
+  }
+}
 
 </script>
 

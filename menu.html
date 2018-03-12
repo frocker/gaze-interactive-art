@@ -4,6 +4,7 @@
   <style>
     body{
       background:black;
+      font-family: Helvetica;
     }
     #header{
       width:100%;
@@ -11,7 +12,28 @@
       text-align: center;
       font-size:30pt;
       margin: 10px 0 0 0;
-      border-bottom: white 3px solid;
+    }
+    .paintingSelected {
+      box-shadow: inset 0px -10px 0px 0px rgba(0,196,255,1);
+    }
+
+    .gazeIndicator{
+          position:relative;
+    }
+    .gazeIndicator:after{
+      position:absolute;
+      bottom:0;
+      left:0%;
+      width:0;
+      height:10px;
+      background:rgba(0,196,255,1);
+      display:block;
+      content:'';
+      transition: width 2s ease-in-out;
+    }
+
+    .gazeIndicatorGazing:after{
+      width:100%;
     }
 
     #columnsContainer{
@@ -23,12 +45,22 @@
       flex: 1;
       order: 2;
       display:grid;
-      grid-template-columns: 50% 50%;
+      grid-template-rows: 39% 39% 19%;
+      grid-template-columns: 49% 49%;
+      grid-column-gap: 10px;
+      grid-row-gap: 10px;
+    }
+    #confirmButton{
+      line-height: 100px;
+      font-size: 24pt;
+      text-align:center;
+      background:#272727;
+      color:white;
+      grid-column: span 2;
+      height:100%;
     }
     .item{
-      transition: box-shadow 2s;
       position:relative;
-      box-shadow: inset 0 0 0 10px black;
       background-size:cover;
       overflow:hidden;
     }
@@ -37,7 +69,7 @@
       color:white;
       background-color:rgba(0, 0, 0, 0.5);
       padding:20px;
-      bottom:0;
+      bottom:10px;
       position:absolute;
     }
     .item_title{
@@ -47,24 +79,21 @@
       font-size:20pt;
     }
     .scrollButton{
-      width: 15%;
-      transition: box-shadow 2s;
+      width: 10%;
     }
     #container{
       display: flex;
       min-height: 100vh;
       flex-direction: column;
     }
-    .gazingOver{
-      box-shadow: inset 0 0 0 40px black;
-    }
+    
   </style>
 </head>
 <body>
 
   <div id="container">
     <div id="header">
-      Select a Painting
+      SELECT A PAINTING
     </div>
     <div id="columnsContainer">
       <div class="scrollButton" style="order:l;">
@@ -72,7 +101,7 @@
 
         <div id="gridContainer">
 
-          <div class="item" style="background-image:url(miro.jpg)"  gazeAction = "openMiro" gazeOverClass='gazingOver' gazeAware>
+          <div id="miro_tilledfields" class="gazeIndicator item" style="background-image:url(miro.jpg)"  gazeAction = "setPainting('miro_tilledfields')" gazeOverClass='gazeIndicatorGazing' gazeAware>
             <div class="item_content" >
               <div class="item_title">
                 The Tilled Field
@@ -83,7 +112,7 @@
             </div>
           </div>
 
-          <div class="item" style="background-image:url(bosch.jpg)"  gazeAction = "openBruegel" gazeOverClass='gazingOver' gazeAware>
+          <div id="bruegel_triumphofdeath" class="gazeIndicator item" style="background-image:url(bosch.jpg)"  gazeAction = "setPainting('bruegel_triumphofdeath')" gazeOverClass='gazeIndicatorGazing' gazeAware>
             <div class="item_content" >
               <div class="item_title">
                 The Triumph of Death
@@ -94,11 +123,31 @@
             </div>
           </div>
 
-          <div style="background:gray;" class="item"  gazeAction = "openMiro" gazeOverClass='gazingOver' gazeAware>
+          <div id="test_3" style="background:gray;" class="item gazeIndicator"  gazeAction = "setPainting('test_3')" gazeOverClass='gazeIndicatorGazing' gazeAware>
+            <div class="item_content" >
+              <div class="item_title">
+                Title
+              </div>
+              <div class = "item_author">
+                Artist
+              </div>
+            </div>
           </div>
-          <div style="background:gray;"  class="item"  gazeAction = "openMiro" gazeOverClass='gazingOver' gazeAware>
+          <div id="test_4" style="background:gray;"  class="item gazeIndicator"  gazeAction = "setPainting('test_4')" gazeOverClass='gazeIndicatorGazing' gazeAware>
+            <div class="item_content" >
+              <div class="item_title">
+                Title
+              </div>
+              <div class = "item_author">
+                Artist
+              </div>
+            </div>
+          </div>
+          <div id = "confirmButton" class=" gazeIndicator" gazeAction = "openPainting()" gazeOverClass='gazeIndicatorGazing' gazeAware>
+            
           </div>
         </div>
+
 
       <div class="scrollButton" style="order:3;">
       </div>
@@ -107,6 +156,8 @@
   </div>
 
   <script>
+
+  var painting = undefined;
 
   //Get Gaze coordinates
    var ipc = require('electron').ipcRenderer;
@@ -140,15 +191,26 @@
       console.log("test Gaze Action");
     }
 
-    function openBruegel(){
-      console.log('Open Bruegel');
-      //ipc.send('open', 'bruegel_triumphofdeath');
+    function openPainting(){
+      console.log("open painting");
+      if (painting != undefined){
+        ipc.send('open', painting);
+      }
     }
 
-    function openMiro(){
-      ipc.send('open', 'miro_tilledfields');
-      console.log('Open Miro');
+    function setPainting(thisPainting){
+      painting = thisPainting;
+      console.log('settin: '+thisPainting);
+      document.getElementById("confirmButton").innerHTML = "View "+thisPainting;
+      var items = document.getElementsByClassName('item');
+      for (var i = 0; i < items.length; i++) {
+        items[i].classList.remove("paintingSelected");
+      }
+      var thisItem = document.getElementById(painting);
+      thisItem.className += " paintingSelected";
     }
+
+ 
 
     function updateGaze() {
       for (var i = 0; i < gazeAwareElements.length; i++) {
@@ -157,7 +219,6 @@
         var hoverClass = el.getAttribute("gazeOverClass");
         var actionFunction = el.getAttribute("gazeAction");
 
-        var hoverClass = el.getAttribute("gazeOverClass");
         if(gazePosition.x > elRect.left
           && gazePosition.x < elRect.left + elRect.width
           && gazePosition.y > elRect.top
@@ -168,7 +229,8 @@
             } else{
               gazeAwareElements[i].dwell=true;
               el.className += " " + hoverClass;
-              gazeAwareElements[i].dwellTimeout = setTimeout(function(){window[actionFunction]()}, 2000);
+              gazeAwareElements[i].dwellTimeout = setTimeout(actionFunction , 2000);
+              //gazeAwareElements[i].dwellTimeout = setTimeout(function(){window[actionFunction]()}, 2000);
             }
           } else {
             //Not Gazing
