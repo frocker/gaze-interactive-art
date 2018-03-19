@@ -46,8 +46,6 @@ console.log(paintingId);
 
 var paintingInfo = require('./paintings/'+paintingId+'.json');
 
-setupGazepoints();
-
 var canvas = document.getElementById("canvas"),
     ctx = canvas.getContext("2d");
 
@@ -58,15 +56,8 @@ viewport.width = window.innerWidth;
 viewport.height = window.innerHeight;
 viewport.aspectratio = viewport.width/viewport.height;
 
-/*var imageDimensions = {width:4096, height:2884, aspectratio: undefined};*/
-
 paintingInfo.aspectratio = paintingInfo.width/paintingInfo.height;
-/*var gazePoints = [
-        {x: 1200, y: 700, r :260, dwelltime: 0, text: "Primo de Rivera, who assumed Spain’s dictatorship in 1923, instituted strict measures to repress Catalan separatism. By depicting the Catalan and French flags together, across the border post from the Spanish flag, Miró announced his allegiance to the Catalan cause.", enabled: true},
-        {x: 3660, y: 1360, r: 360, dwelltime: 0, text: "The stylized figure with a plow has its source in the prehistoric cave paintings of Altamira, which Miró knew well.", enabled: true},
-        {x: 2800, y: 1100, r: 300, dwelltime: 0, text: "Miró found something alive and magical in all things: the gigantic ear affixed to the trunk of the tree reflects his belief that every object contains a living soul.", enabled: true}
-    ];
-*/
+
 
 var imageDefault = new Image();
 imageDefault.src = paintingInfo.image;
@@ -89,13 +80,17 @@ var imageDataDefault;
 var pixelsDefault;
 var numPixels;
 
-var imageModulated = new Image();
+var imageModulated = new Image();   
 var imageDataModulated;
 var pixelsModulated;
 
+var gazePointsCanvas = new Array();
+
+
 imageDefault.onload = function(){
-    //Do Initial image setup and modulations
-    console.log("ImgDefault Load");
+  console.log("Loaded Default Image");
+
+    //Create Modulated Image from original
     ctx.drawImage(imageDefault,0,0, canvas.width, canvas.height);
     imageDataDefault = ctx.getImageData(0, 0, canvas.width, canvas.height);
     imageDataModulated = ctx.getImageData(0, 0, canvas.width, canvas.height);
@@ -109,9 +104,17 @@ imageDefault.onload = function(){
       pixelsModulated[i*4+2] = pixelsDefault[i*4+2] * 1.2; // Blue
     }
     ctx.putImageData(imageDataModulated, 0, 0);
-    imageModulated.src = canvas.toDataURL();
+     imageModulated.src = canvas.toDataURL(); //Is this async?
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    render();
+}
+
+imageModulated.onload = function(){
+  console.log("img modulated loaded");
+ 
+
+  setupGazepoints();
+
+  render();
 }
 
 var renderPoints = true;
@@ -134,40 +137,29 @@ function render() {
     then = now - (delta % interval);
   }
 
-ctx.clearRect(0, 0, canvas.width, canvas.height);
-  if (renderPoints){
-    if (on){
-      //ToDo: Refractor this so we don't need temp canvas
-      var temp = document.createElement('canvas'),
-          tx = temp.getContext('2d');
-      temp.width = ctx.canvas.width;
-      temp.height = ctx.canvas.height;
-      for (var i = 0; i < paintingInfo.gazePoints.length; i++) {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  if (renderPoints & on){
+    for (var i = 0; i < paintingInfo.gazePoints.length; i++) {
       if(paintingInfo.gazePoints[i].enabled){
-          tx.drawImage(imageModulated, 0, 0);
-          if(clipArc(tx, paintingInfo.gazePoints[i].x*renderedScaleFactor,paintingInfo.gazePoints[i].y*renderedScaleFactor,paintingInfo.gazePoints[i].r*renderedScaleFactor)){
-            paintingInfo.gazePoints[i].dwelltime = 0;
-            ctx.drawImage(temp, 0, 0);
-          } else {
-            paintingInfo.gazePoints[i].dwelltime += delta;
-            if(paintingInfo.gazePoints[i].dwelltime>DWELL_TIME){
-              paintingInfo.gazePoints[i].enabled=false;
-              //set visibility to true
-              document.getElementById("infoText").innerHTML=paintingInfo.gazePoints[i].text;
-              document.getElementById("infoText").style.visibility="visible";
-              renderPoints = false;
-              setTimeout(function() { hideInfoText(); }, 8000);
-            }
+        if(!gazingAtPoint(paintingInfo.gazePoints[i].x*renderedScaleFactor,paintingInfo.gazePoints[i].y*renderedScaleFactor,paintingInfo.gazePoints[i].r*renderedScaleFactor)){
+          paintingInfo.gazePoints[i].dwelltime = 0;
+          ctx.drawImage(gazePointsCanvas[i], 0, 0);
+        } else {
+          paintingInfo.gazePoints[i].dwelltime += delta;
+          if(paintingInfo.gazePoints[i].dwelltime>DWELL_TIME){
+            paintingInfo.gazePoints[i].enabled=false;
+            //set visibility to true
+            document.getElementById("infoText").innerHTML=paintingInfo.gazePoints[i].text;
+            document.getElementById("infoText").style.visibility="visible";
+            renderPoints = false;
+            setTimeout(function() { hideInfoText(); }, 8000);
           }
         }
       }
-      //Garbage Collection, gg javascript
-      temp.height = null;
-      temp.width = null;
     }
   }
-requestAnimationFrame(render);
-    
+  requestAnimationFrame(render); 
 }
 
 function hideInfoText(){
@@ -176,32 +168,51 @@ function hideInfoText(){
 
 }
 
-//Returns true, false, for if point should be rendered.
+//Depro Returns true, false, for if point should be rendered.
 function clipArc(context, x, y, r) {
     context.globalCompositeOperation = 'destination-in';
     context.filter = "blur(10px)";  // "feather"
     context.beginPath();
 
     context.arc(x, y, r, 0, 2 * Math.PI);
+
+    /*
     //Check if mouse is in Path
     if (context.isPointInPath(gazePosition.x-canvasMargin, gazePosition.y)) {
       var renderPoint = false;
     } else {
       var renderPoint = true;
     }
-
+    */
     context.fill();
 
     // reset comp. mode and filter
     context.globalCompositeOperation = 'source-over';
     context.filter = "none";
-    return renderPoint;
+    //return renderPoint;
+}
+
+//Return true/false for if gazing at point
+function gazingAtPoint(x, y, r){
+  //Get x,y,r
+  //Check if point in circle, use offset
+  return (Math.pow((gazePosition.x - x + canvasMargin),2) + Math.pow((gazePosition.y - y),2) < Math.pow(r,2));
+
 }
 
 function setupGazepoints(){
   for (var i = 0; i < paintingInfo.gazePoints.length; i++) {
     paintingInfo.gazePoints[i].enabled = true;
     paintingInfo.gazePoints[i].dwelltime = 0;
+
+    //ToDo: Create Canvases for each gp
+    gazePointsCanvas.push(document.createElement('canvas'));
+    var tx = gazePointsCanvas[i].getContext('2d');
+    gazePointsCanvas[i].width = ctx.canvas.width;
+    gazePointsCanvas[i].height = ctx.canvas.height;
+    tx.drawImage(imageModulated, 0, 0);
+    //tx.fillRect(0,0,1920,1080);
+     clipArc(tx, paintingInfo.gazePoints[i].x*renderedScaleFactor,paintingInfo.gazePoints[i].y*renderedScaleFactor,paintingInfo.gazePoints[i].r*renderedScaleFactor);
   }
 }
 
