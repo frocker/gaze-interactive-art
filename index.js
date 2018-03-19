@@ -14,7 +14,6 @@ var server = dgram.createSocket('udp4');
 
 var previousTimestamp = 0;
 
-
 server.on('listening', function () {
     var address = server.address();
     console.log('UDP Server listening on ' + address.address + ":" + address.port);
@@ -43,7 +42,7 @@ app.on('ready', () => {
   mainWindow.setFullScreen(true);
   mainWindow.loadURL(path.join('file://', __dirname, 'menu.html'));
   mainWindow.webContents.on('did-finish-load', function() {
-    //Loaded, surface meno
+    //Loaded, surface menu
   });
 });
 

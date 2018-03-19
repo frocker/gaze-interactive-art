@@ -98,7 +98,6 @@
     <div id="columnsContainer">
       <div class="scrollButton" style="order:l;">
       </div>
-
         <div id="gridContainer">
 
           <div class="gazeIndicator item"  gazeOverClass='gazeIndicatorGazing' gazeAware>
@@ -109,7 +108,6 @@
               </div>
             </div>
           </div>
-
           <div class="gazeIndicator item"  gazeOverClass='gazeIndicatorGazing' gazeAware>
             <div class="item_content" >
               <div class="item_title">
@@ -118,7 +116,6 @@
               </div>
             </div>
           </div>
-
           <div id="test_3" class="item gazeIndicator"  gazeOverClass='gazeIndicatorGazing' gazeAware>
             <div class="item_content" >
               <div class="item_title">
@@ -157,7 +154,7 @@
 
 
   //Get Gaze coordinates
-   var ipc = require('electron').ipcRenderer;
+  var ipc = require('electron').ipcRenderer;
     ipc.on('gaze-pos', (event, arg) => {
       if(arg.timestamp )
       gazePosition.x = arg.x;
@@ -183,12 +180,6 @@
 
     setupGaze();
     setInterval(updateGaze, 10);
-
-
-
-    function testGazeAction(){
-      console.log("test Gaze Action");
-    }
 
     function openPainting(){
       console.log("open painting");
@@ -256,11 +247,8 @@
             var artist = items[i].getElementsByClassName("item_author")[0];
             title.innerHTML = paintings[i+index].title + " (" + paintings[i+index].year + ")";
             artist.innerHTML = paintings[i+index].artist;
-
         }
-      }
-
-      
+      }  
     }
 
     function loadPaintings(){
