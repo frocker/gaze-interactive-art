@@ -6,8 +6,8 @@
 "width":3051,
 "height":2161,
 "gazePoints" :  [
-        {"x": 1200, "y": 700, "r" :260,  "text": "Primo de Rivera, who assumed Spain’s dictatorship in 1923, instituted strict measures to repress Catalan separatism. By depicting the Catalan and French flags together, across the border post from the Spanish flag, Miró announced his allegiance to the Catalan cause."},
-        {"x": 2000, "y": 1360, "r": 360, "text": "The stylized figure with a plow has its source in the prehistoric cave paintings of Altamira, which Miró knew well."},
-        {"x": 2800, "y": 1100, "r": 300, "text": "Miró found something alive and magical in all things: the gigantic ear affixed to the trunk of the tree reflects his belief that every object contains a living soul."}
+        {"x": 1200, "y": 700, "r" :80,  "audio": "miro_1.wav", "text": "Primo de Rivera, who assumed Spain’s dictatorship in 1923, instituted strict measures to repress Catalan separatism. By depicting the Catalan and French flags together, across the border post from the Spanish flag, Miró announced his allegiance to the Catalan cause."},
+        {"x": 2000, "y": 1360, "r": 100, "audio": "miro_2.wav","text": "The stylized figure with a plow has its source in the prehistoric cave paintings of Altamira, which Miró knew well."},
+        {"x": 2800, "y": 1100, "r": 100,"audio": "miro_3.wav", "text": "Miró found something alive and magical in all things: the gigantic ear affixed to the trunk of the tree reflects his belief that every object contains a living soul."}
   ]
 }

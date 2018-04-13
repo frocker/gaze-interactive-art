@@ -50,3 +50,8 @@ ipc.on('open', function (e, painting) {
   console.log("Opening: " + painting);
   mainWindow.loadURL(path.join('file://', __dirname, 'index.html?painting='+painting));
 });
+
+ipc.on('menu', function (e) {
+  console.log("Returning to Menu: ");
+  mainWindow.loadURL(path.join('file://', __dirname, 'menu.html'));
+});

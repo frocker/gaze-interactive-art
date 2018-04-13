@@ -5,13 +5,7 @@
     body{
       background:black;
       font-family: Helvetica;
-    }
-    #header{
-      width:100%;
-      color:white;
-      text-align: center;
-      font-size:30pt;
-      margin: 10px 0 0 0;
+      margin:0;
     }
     .paintingSelected {
       box-shadow: inset 0px -10px 0px 0px rgba(0,196,255,1);
@@ -49,9 +43,10 @@
       grid-template-columns: 49% 49%;
       grid-column-gap: 10px;
       grid-row-gap: 10px;
+      margin-top:12px;
     }
     #confirmButton{
-      line-height: 100px;
+      line-height: 200px;
       font-size: 24pt;
       text-align:center;
       background:#272727;
@@ -92,9 +87,6 @@
 <body>
 
   <div id="container">
-    <div id="header">
-      SELECT A PAINTING
-    </div>
     <div id="columnsContainer">
       <div class="scrollButton" style="order:l;">
       </div>
@@ -132,8 +124,8 @@
               </div>
             </div>
           </div>
-          <div id = "confirmButton" class=" gazeIndicator" gazeAction = "openPainting()" gazeOverClass='gazeIndicatorGazing' gazeAware>
-            
+          <div id = "confirmButton" gazeAction = "openPainting()" gazeOverClass='gazeIndicatorGazing' gazeAware>
+            SELECT A PAINTING
           </div>
         </div>
 
@@ -191,7 +183,12 @@
     function setPainting(thisPainting){
       painting = thisPainting;
       console.log('setting: '+thisPainting);
-      document.getElementById("confirmButton").innerHTML = "View "+thisPainting;
+      for(var i=0;i<paintings.length;i++){
+        if(paintings[i].id==thisPainting){
+          document.getElementById("confirmButton").innerHTML = "View "+paintings[i].title;
+        }
+      } 
+      document.getElementById("confirmButton").classList = "gazeIndicator";
       var items = document.getElementsByClassName('item');
       for (var i = 0; i < items.length; i++) {
         items[i].classList.remove("paintingSelected");
