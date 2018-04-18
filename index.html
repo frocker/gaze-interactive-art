@@ -80,6 +80,12 @@
 
 <script>
 
+var LOGGING = true;
+var log = "";
+var infoLog = "";
+var DEBUG=false;
+var DEBUG_OVERLAY=false;
+
 setupMenuButton();
 
 //Get Gaze coordinates
@@ -98,11 +104,35 @@ ipc.on('gaze-pos', (event, arg) => {
 var gazePosition = {x : 0, y: 0};
 var lastGazePosition = {x : 0, y: 0};
 
+let params = (new URL(location)).searchParams;
+
+var SGD = true;
+var AUDIO = true;
+switch(params.get("design")){
+  case "1":
+    SGD = false;
+    AUDIO = false;
+  break;
+  case "2":
+    SGD = true;
+    AUDIO = false;
+  break;
+  case "3":
+    SGD = false;
+    AUDIO = true;
+  break;
+  case "4":
+    SGD = true;
+    AUDIO = true;
+  break;
+}
+
+printDebug(Date.now());
+printDebug(String("SGD: "+SGD+" AUDIO: "+AUDIO));
 
 /*Load Image here*/
-let params = (new URL(location)).searchParams;
 var paintingId = params.get("painting");
-console.log(paintingId);
+printDebug(paintingId);
 
 var paintingInfo = require('./paintings/'+paintingId+'.json');
 
@@ -122,12 +152,11 @@ paintingInfo.aspectratio = paintingInfo.width/paintingInfo.height;
 var testCanvas = document.getElementById("testCanvas");
 testCanvas.width = viewport.width;
 testCanvas.height = viewport.height;
+printDebug("Viewport: width: "+viewport.width+", height: "+viewport.height);
 
 var imageDefault = new Image();
 imageDefault.src = paintingInfo.image;
 var renderedScaleFactor;
-//console.log(viewport);
-//console.log(imageDimensions);
 if(viewport.aspectratio<paintingInfo.aspectratio){
   //Fit width
   canvas.width = viewport.width;
@@ -143,7 +172,7 @@ var canvasMargin = canvas.getBoundingClientRect().left;
 var imageDataDefault;
 var pixelsDefault;
 var numPixels;
-
+printDebug("Canvas: width: "+canvas.width+", height: "+canvas.height+ ", margin: "+canvasMargin);
 var imageModulated = new Image();   
 var imageDataModulated;
 var pixelsModulated;
@@ -178,7 +207,10 @@ imageModulated.onload = function(){
 }
 
 var renderPoints = true; //Globally disable render of points
-var renderPointsVisual = true; //Globally disable visual rendering of point
+var renderPointsVisual = false; //Globally disable visual rendering of point
+//Delay rendering of points for a few seconds:
+setTimeout(function() {renderPointsVisual=true;}, 5000);
+
 var on = true; //true/false for frequency modulations
 
 var fps = 5;
@@ -190,6 +222,12 @@ var delta;
 var DWELL_TIME = 3000;
 
 function render() {
+
+  if(SGD == false & AUDIO==false){
+    renderPoints=false;
+    return;
+  }
+
   now = Date.now();
   delta = now - then;
 
@@ -209,7 +247,7 @@ function render() {
           if(!gazingAtPoint(gazePoint.x*renderedScaleFactor,gazePoint.y*renderedScaleFactor,gazePoint.r*renderedScaleFactor)){
             //Not gazing at Point
             gazePoint.dwelltime = 0;
-            if(renderPointsVisual && i==currentGazePoint){
+            if(renderPointsVisual && i==currentGazePoint && SGD){
               ctx.drawImage(gazePointsCanvas[currentGazePoint], 0, 0);
             }
           } else {
@@ -221,21 +259,35 @@ function render() {
               renderPoints = false;
 
               if(i==currentGazePoint){
-                printDebug("Current Gazpoint viewed");
+                printDebug("Current Gazpoint viewed ("+currentGazePoint+")");
                 
+                if(!AUDIO){
+                  setTimeout(function() {
+                   renderPoints=true;
+                   renderPointsVisual=true;
+                   incrementGazePoint();
+                 }, 10000);
+                }else{
                   playAudio(gazePoint.audio, function() {
                    renderPoints=true;
                    renderPointsVisual=true;
                    incrementGazePoint();
                  }, 3000);            
-        
+                }
               } else {
-                printDebug("Non Current Gazepoint viewed");
-                playAudio(gazePoint.audio, function() {
-                 renderPoints=true;
-                 renderPointsVisual=true;
-                }, 3000);
-
+                printDebug("Non Current Gazepoint viewed ("+currentGazePoint+")");
+                if(!AUDIO){
+                  setTimeout(function() {
+                   renderPoints=true;
+                   renderPointsVisual=true;
+                   incrementGazePoint();
+                 }, 10000);
+                }else{
+                  playAudio(gazePoint.audio, function() {
+                   renderPoints=true;
+                   renderPointsVisual=true;
+                  }, 3000);
+                }
               }
 
               
@@ -341,10 +393,12 @@ function checkMenuButton(){
                clearTimeout(menuButton.dwellTimeout);
             }
           }
-  
 }
 
 function menuButtonFunction(){
+  if(LOGGING){
+    saveLog();
+  }
   ipc.send('menu');
 }
 
@@ -356,7 +410,9 @@ var fixation = {x:undefined, y:undefined};
 function checkFixation(){
   //Velocity threshold, will need to be adjusted based on distance & screen size
   var threshold=25;
-  var velocity = v_Magnitude(gazePosition.x-lastGazePosition.x, gazePosition.y-lastGazePosition.y);
+  var vX = gazePosition.x-lastGazePosition.x;
+  var vY = gazePosition.y-lastGazePosition.y;
+  var velocity = v_Magnitude(vX, vY);
   if(velocity<threshold){
     //Fixated
     if(!fixated){
@@ -364,14 +420,13 @@ function checkFixation(){
       fixation.x = gazePosition.x;
       fixation.y = gazePosition.y;
 
+      if(LOGGING){log += fixation.x+ ","+fixation.y+"\n"};
       testCanvas_renderPoint(fixation.x,fixation.y,"red");  
       
       if(renderPoints){
         updateVectorW();
       }
-      //ToDo: Log fixation point, if logging is enabled
-      //console.log("Fixated");
-      //console.log("v:" + velocity);
+ 
     }
   } else{
     //Saccading
@@ -380,8 +435,7 @@ function checkFixation(){
   
     if(fixated){
       fixated = false;
-      //console.log("Saccading");
-      //console.log("v:" + velocity);
+
     }
   }
 }
@@ -416,8 +470,9 @@ function saccadicMasking(){
     //console.log("Theta: "+theta);
     if(theta < thetaThreshold){
       //Saccading, towards POI
-      printDebug("Saccade towards Gaze Point");
+      
       if(renderPointsVisual){
+        printDebug("Saccade towards Gaze Point, hiding");
         renderPointsVisual = false;
         setTimeout(function() { renderPointsVisual = true; }, 8000);
       }    
@@ -460,16 +515,19 @@ function testCanvas_clear(){
 }
 
 function printDebug(message){
+  if(LOGGING){
+    infoLog+=message+"\n";
+  }
   if(!DEBUG){return;}
   console.log(message);
 }
 
-var DEBUG=true;
+
 function debug(){
   DEBUG = true;
 }
 
-var DEBUG_OVERLAY=false;
+
 function debugOverlay(){
   DEBUG_OVERLAY=true;
   document.getElementById("testCanvas").style.display="inline";
@@ -478,6 +536,17 @@ function debugOverlay(){
 window.setInterval(function(){
   testCanvas_clear();
 }, 10000);
+
+
+function saveLog(){
+  // your content is into a variable named 'content'
+  var fs = require('fs');
+  try { fs.writeFileSync('logs/'+Date.now()+'.txt', log, 'utf-8'); }
+  catch(e) { alert('Failed to save the file !'); }
+
+  try { fs.writeFileSync('logs/'+Date.now()+'_info.txt', infoLog, 'utf-8'); }
+  catch(e) { alert('Failed to save the file !'); }
+}
 
 </script>
 

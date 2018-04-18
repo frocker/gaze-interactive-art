@@ -27,7 +27,6 @@ function parseMessage(message){
   var messageObj = JSON.parse(message);
   if(messageObj.timestamp>previousTimestamp){
     if(mainWindow !== undefined){
-      //console.log(messageObj.x+", "+messageObj.y +' timestamp:'+messageObj.timestamp);
       mainWindow.webContents.send('gaze-pos', messageObj);
     }
     previousTimestamp = messageObj.timestamp;
@@ -46,9 +45,9 @@ app.on('ready', () => {
   });
 });
 
-ipc.on('open', function (e, painting) {
-  console.log("Opening: " + painting);
-  mainWindow.loadURL(path.join('file://', __dirname, 'index.html?painting='+painting));
+ipc.on('open', function (e, painting, design) {
+  console.log("Opening: " + painting + ", Design: "+design);
+  mainWindow.loadURL(path.join('file://', __dirname, 'index.html?painting='+painting+"&design="+design));
 });
 
 ipc.on('menu', function (e) {
