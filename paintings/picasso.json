@@ -1,0 +1,15 @@
+{
+"title": "Guernica",
+"artist": "Pablo Picasso",
+"year" : "1937",
+"medium": "Oil on canvas",
+"image": "painting_images/picasso.jpg",
+"width":2105,
+"height":953,
+"gazePoints" :  [
+       	{"x": 920, "y": 580, "r" :100, "audio": "picasso_1.mp3"},
+        {"x": 250, "y": 370, "r": 100,  "audio": "picasso_2.mp3"},
+        {"x": 320, "y": 200, "r": 100, "audio": "picasso_3.mp3"},
+        {"x": 1130, "y": 850, "r": 100, "audio": "picasso_4.mp3"},
+        {"x": 770, "y": 80, "r": 100, "audio": "picasso_5.mp3"}]
+}

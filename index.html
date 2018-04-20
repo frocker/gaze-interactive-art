@@ -192,9 +192,9 @@ imageDefault.onload = function(){
     pixelsModulated  = imageDataModulated.data;
 
     for (var i = 0; i < numPixels; i++) {
-      pixelsModulated[i*4] = pixelsDefault[i*4]     * 1.1; // Red
-      pixelsModulated[i*4+1] = pixelsDefault[i*4+1] * 1.1; // Green
-      pixelsModulated[i*4+2] = pixelsDefault[i*4+2] * 1.1; // Blue
+      pixelsModulated[i*4] = pixelsDefault[i*4]     * 1.02; // Red
+      pixelsModulated[i*4+1] = pixelsDefault[i*4+1] * 1.02; // Green
+      pixelsModulated[i*4+2] = pixelsDefault[i*4+2] * 1.02; // Blue
     }
     ctx.putImageData(imageDataModulated, 0, 0);
      imageModulated.src = canvas.toDataURL(); 

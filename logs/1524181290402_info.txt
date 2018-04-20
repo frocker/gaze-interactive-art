@@ -1,0 +1,5 @@
+1524181286213
+SGD: true AUDIO: true
+dali
+Viewport: width: 1560, height: 1060
+Canvas: width: 1472, height: 1060, margin: 44

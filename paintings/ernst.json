@@ -1,0 +1,16 @@
+{
+"title": "The Elephant Celebes",
+"artist": "Max Ernst",
+"year" : "1921",
+"medium": "Oil on canvas",
+"image": "painting_images/ernst.jpg",
+"width":1322,
+"height":1536,
+"gazePoints" :  [
+       	{"x": 340, "y": 800, "r" :100, "audio": "ernst_1.mp3"},
+        {"x": 1150, "y": 1300, "r": 100,  "audio": "ernst_2.mp3"},
+        {"x": 630, "y": 700, "r": 100, "audio": "ernst_3.mp3"},
+        {"x": 200, "y": 90, "r": 100, "audio": "ernst_4.mp3"},
+        {"x": 950, "y": 250, "r": 100, "audio": "ernst_5.mp3"}
+    ]
+}

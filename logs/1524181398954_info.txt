@@ -1,0 +1,20 @@
+1524181298610
+SGD: true AUDIO: true
+dali
+Viewport: width: 1560, height: 1060
+Canvas: width: 1472, height: 1060, margin: 44
+Saccade towards Gaze Point, hiding
+Saccade towards Gaze Point, hiding
+Current Gazpoint viewed (0)
+Current Gaze Point: 1
+Saccade towards Gaze Point, hiding
+Current Gazpoint viewed (1)
+Current Gaze Point: 2
+Saccade towards Gaze Point, hiding
+Current Gazpoint viewed (2)
+Current Gaze Point: 3
+Current Gazpoint viewed (3)
+Current Gaze Point: 4
+Saccade towards Gaze Point, hiding
+Current Gazpoint viewed (4)
+All gaze points viewed.

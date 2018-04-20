@@ -1,0 +1,16 @@
+{
+"title": "Carnaval de Arlequín",
+"artist": "Joan Miró",
+"year" : "1924-1925",
+"medium": "Oil on canvas",
+"image": "painting_images/miro.jpg",
+"width":2100,
+"height":1483,
+"gazePoints" :  [
+       	{"x": 680, "y": 460, "r" :100, "audio": "miro_1.mp3"},
+        {"x": 520, "y": 940, "r": 100,  "audio": "miro_2.mp3"},
+        {"x": 1900, "y": 1320, "r": 100, "audio": "miro_3.mp3"},
+        {"x": 120, "y": 100, "r": 100, "audio": "miro_4.mp3"},
+        {"x": 1750, "y": 600, "r": 100, "audio": "miro_5.mp3"}
+    ]
+}

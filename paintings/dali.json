@@ -1,0 +1,16 @@
+﻿{
+"title": "The Temptation of Saint Anthony",
+"artist": "Salvador Dalí",
+"year" : "1946",
+"medium": "Oil on canvas",
+"image": "painting_images/dali.jpg",
+"width":2400,
+"height":1728,
+"gazePoints" :  [
+        {"x": 180, "y": 1300, "r" :100, "audio": "dali_1.mp3"},
+        {"x": 640, "y": 280, "r": 100,  "audio": "dali_2.mp3"},
+        {"x": 900, "y": 260, "r": 100, "audio": "dali_3.mp3"},
+        {"x": 1320, "y": 440, "r": 100, "audio": "dali_4.mp3"},
+        {"x": 2160, "y": 500, "r": 100, "audio": "dali_5.mp3"}
+  ]
+}
