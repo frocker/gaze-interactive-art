@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+  body{
+    font-family:Helvetica;
+    margin:0;
+    background:black;
+    cursor: none;    
+  }
+
+  #menuButtonIcon{
+    font-size: 7pt;
+    letter-spacing: 2px;
+    line-height: 75%;
+    margin-top:14px;
+    margin-bottom:14px;
+  }
+  #menuButton{
+    font-size:16pt;
+    color:white;
+    text-align: center;
+    position:absolute;
+    top:0;
+    right:0;
+    width:100px;
+    height:100px;
+
+  }
+  #menuButton:after{
+      position:absolute;
+      bottom:0;
+      left:0%;
+      width:0;
+      height:10px;
+      background:rgba(0,196,255,1);
+      display:block;
+      content:'';
+      transition: width 3s ease-in-out;
+    }
+
+  .menuButtonGazing{
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+
+    .menuButtonGazing:after{
+      width:100% !important;
+    }
+
+  #infoText{
+    width:100%;
+    bottom:0;
+    box-sizing: border-box;
+    padding:20px;
+    position:absolute;
+    font-size:16pt;
+    color:white;
+    background-color:rgba(0, 0, 0, 0.5);
+    text-align:center;
+    visibility:hidden;
+  }
+  </style>
+
+</head>
+
+<body>
+  <div id="menuButton">
+    <div id="menuButtonIcon">
+      &#x25a0;&#x25a0;&#x25a0;<br/>
+      &#x25a0;&#x25a0;&#x25a0;<br/>
+      &#x25a0;&#x25a0;&#x25a0;<br/>
+    </div>
+    MENU
+  </div>
+  <div id="infoText"></div>
+  <canvas id="testCanvas" style="position:absolute;display:none;"></canvas>
+  <canvas id="canvas" style="background-size:contain;margin-left:auto;margin-right:auto;display:block;">
+  </canvas>
+
+
+
+<script>
+
+var LOGGING = true;
+var log = "";
+var infoLog = "";
+var DEBUG=false;
+var DEBUG_OVERLAY=false;
+
+setupMenuButton();
+
+//Get Gaze coordinates
+var ipc = require('electron').ipcRenderer;
+ipc.on('gaze-pos', (event, arg) => {
+  if(arg.timestamp )
+  lastGazePosition.x= gazePosition.x;
+  lastGazePosition.y=gazePosition.y;
+  gazePosition.x = arg.x;
+  gazePosition.y = arg.y;
+  checkMenuButton();
+  checkFixation();
+  saccadicMasking();
+  
+});
+var gazePosition = {x : 0, y: 0};
+var lastGazePosition = {x : 0, y: 0};
+
+let params = (new URL(location)).searchParams;
+
+var SGD = true;
+var AUDIO = true;
+switch(params.get("design")){
+  case "1":
+    SGD = false;
+    AUDIO = false;
+  break;
+  case "2":
+    SGD = true;
+    AUDIO = false;
+  break;
+  case "3":
+    SGD = false;
+    AUDIO = true;
+  break;
+  case "4":
+    SGD = true;
+    AUDIO = true;
+  break;
+}
+
+printDebug(Date.now());
+printDebug(String("SGD: "+SGD+" AUDIO: "+AUDIO));
+
+/*Load Image here*/
+var paintingId = params.get("painting");
+printDebug(paintingId);
+
+var paintingInfo = require('./paintings/'+paintingId+'.json');
+
+var canvas = document.getElementById("canvas"),
+    ctx = canvas.getContext("2d");
+
+canvas.style.backgroundImage = 'url('+paintingInfo.image+')';
+
+var viewport = {width:undefined, height:undefined, aspectratio: undefined};
+viewport.width = window.innerWidth;
+viewport.height = window.innerHeight;
+viewport.aspectratio = viewport.width/viewport.height;
+
+paintingInfo.aspectratio = paintingInfo.width/paintingInfo.height;
+
+
+var testCanvas = document.getElementById("testCanvas");
+testCanvas.width = viewport.width;
+testCanvas.height = viewport.height;
+printDebug("Viewport: width: "+viewport.width+" Height: "+viewport.height);
+
+var imageDefault = new Image();
+imageDefault.src = paintingInfo.image;
+var renderedScaleFactor;
+if(viewport.aspectratio<paintingInfo.aspectratio){
+  //Fit width
+  canvas.width = viewport.width;
+  canvas.height = paintingInfo.height * (canvas.width/paintingInfo.width);
+  renderedScaleFactor = canvas.width/paintingInfo.width;
+} else {
+  //Fit Height
+  canvas.height = viewport.height;
+  canvas.width = paintingInfo.width * (canvas.height/paintingInfo.height);
+  renderedScaleFactor = canvas.height/paintingInfo.height;
+}
+var canvasMargin = canvas.getBoundingClientRect().left;
+var imageDataDefault;
+var pixelsDefault;
+var numPixels;
+printDebug("Canvas: width: "+canvas.width+" Height: "+canvas.height+ " Margin: "+canvasMargin);
+var imageModulated = new Image();   
+var imageDataModulated;
+var pixelsModulated;
+
+var gazePointsCanvas = new Array();
+
+var currentGazePoint = 0;
+
+
+imageDefault.onload = function(){
+    //Create Modulated Image from original
+    ctx.drawImage(imageDefault,0,0, canvas.width, canvas.height);
+    imageDataDefault = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    imageDataModulated = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    pixelsDefault = imageDataDefault.data;
+    numPixels = imageDataDefault.width * imageDataDefault.height;
+    pixelsModulated  = imageDataModulated.data;
+
+    for (var i = 0; i < numPixels; i++) {
+      pixelsModulated[i*4] = pixelsDefault[i*4]     * 1.05; // Red
+      pixelsModulated[i*4+1] = pixelsDefault[i*4+1] * 1.05; // Green
+      pixelsModulated[i*4+2] = pixelsDefault[i*4+2] * 1.05; // Blue
+    }
+    ctx.putImageData(imageDataModulated, 0, 0);
+     imageModulated.src = canvas.toDataURL(); 
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+}
+
+imageModulated.onload = function(){
+  setupGazepoints();
+  render();
+}
+
+var renderPoints = false; //Globally disable render of points
+var renderPointsVisual = false; //Globally disable visual rendering of point
+//Delay rendering of points for a few seconds:
+setTimeout(function() {renderPoints=true;}, 4000);
+setTimeout(function() {renderPointsVisual=true;}, 6000);
+
+var on = true; //true/false for frequency modulations
+
+var fps = 5;
+var now;
+var then = Date.now();
+var interval = 1000/fps;
+var delta;
+
+var DWELL_TIME = 4000;
+
+function render() {
+
+  if(SGD == false & AUDIO==false){
+    renderPoints=false;
+    return;
+  }
+
+  now = Date.now();
+  delta = now - then;
+
+  if (delta > interval) {
+    on = !on;
+    then = now - (delta % interval);
+  }
+
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  if (renderPoints & on){
+
+    for (var i = 0; i < paintingInfo.gazePoints.length; i++) {
+
+      var gazePoint = paintingInfo.gazePoints[i];
+      if(gazePoint.enabled){
+          if(!gazingAtPoint(gazePoint.x*renderedScaleFactor,gazePoint.y*renderedScaleFactor,gazePoint.r*renderedScaleFactor)){
+            //Not gazing at Point
+            gazePoint.dwelltime = 0;
+            if(renderPointsVisual && i==currentGazePoint && SGD){
+              ctx.drawImage(gazePointsCanvas[currentGazePoint], 0, 0);
+            }
+          } else {
+            //Gazing at Point
+            gazePoint.dwelltime += delta;
+            if(gazePoint.dwelltime>DWELL_TIME){
+              gazePoint.enabled=false;
+              
+              renderPoints = false;
+
+              if(i==currentGazePoint){
+                printDebug("Current Gazpoint viewed ("+currentGazePoint+")");
+                
+                if(!AUDIO){
+                  setTimeout(function() {
+                   renderPoints=true;
+                   renderPointsVisual=true;
+                   incrementGazePoint();
+                 }, 10000);
+                }else{
+                  playAudio(gazePoint.audio, function() {
+                   renderPoints=true;
+                   renderPointsVisual=true;
+                   incrementGazePoint();
+                 }, 3000);            
+                }
+              } else {
+                printDebug("Non Current Gazepoint viewed ("+currentGazePoint+")");
+                if(!AUDIO){
+                  setTimeout(function() {
+                   renderPoints=true;
+                   renderPointsVisual=true;
+                   incrementGazePoint();
+                 }, 10000);
+                }else{
+                  playAudio(gazePoint.audio, function() {
+                   renderPoints=true;
+                   renderPointsVisual=true;
+                  }, 3000);
+                }
+              }
+
+              
+            }
+          }
+        }
+      }
+  }
+  requestAnimationFrame(render); 
+}
+
+function playAudio(filename, callback, callbackDelay){
+  var audio = new Audio("painting_audio/"+filename);
+  audio.loop = false;
+  audio.play(); 
+  audio.addEventListener('ended', function() {
+    this.currentTime = 0;
+    setTimeout(callback, callbackDelay);
+  }, false);
+}
+
+//Creates feathered blur
+function clipArc(context, x, y, r) {
+    context.globalCompositeOperation = 'destination-in';
+    context.filter = "blur(10px)";  // "feather"
+    context.beginPath();
+
+    context.arc(x, y, r, 0, 2 * Math.PI);
+
+    context.fill();
+
+    // reset comp. mode and filter
+    context.globalCompositeOperation = 'source-over';
+    context.filter = "none";
+}
+
+//Return true/false for if gazing at point
+function gazingAtPoint(x, y, r){
+  //Get x,y,r
+  //Check if point in circle, use offset
+  var margin = 100; //Margin around point
+  return (Math.pow((gazePosition.x - x - canvasMargin),2) + Math.pow((gazePosition.y - y),2) < Math.pow(r+margin,2));
+
+}
+
+function setupGazepoints(){
+  for (var i = 0; i < paintingInfo.gazePoints.length; i++) {
+    paintingInfo.gazePoints[i].enabled = true;
+    paintingInfo.gazePoints[i].dwelltime = 0;
+
+    gazePointsCanvas.push(document.createElement('canvas'));
+    var tx = gazePointsCanvas[i].getContext('2d');
+    gazePointsCanvas[i].width = ctx.canvas.width;
+    gazePointsCanvas[i].height = ctx.canvas.height;
+    tx.drawImage(imageModulated, 0, 0);
+     clipArc(tx, paintingInfo.gazePoints[i].x*renderedScaleFactor,paintingInfo.gazePoints[i].y*renderedScaleFactor,paintingInfo.gazePoints[i].r*renderedScaleFactor);
+  }
+}
+
+function incrementGazePoint(){
+  currentGazePoint++;
+  if(currentGazePoint>=paintingInfo.gazePoints.length){
+    renderPoints = false;
+    printDebug("All gaze points viewed.");
+  } else{
+    if(!paintingInfo.gazePoints[currentGazePoint].enabled){
+      incrementGazePoint();
+    } else{
+      printDebug("Current Gaze Point: "+currentGazePoint);
+      updateVectorW();
+    }
+  }
+}
+
+//var menuButton = {el:undefined, rect:undefined, dwell: undefined, dwellTimeout:undefined};
+var menuButton;
+function setupMenuButton(){
+  menuButton = {el:undefined, rect:undefined, dwell: undefined, dwellTimeout:undefined};
+  menuButton.el = document.getElementById("menuButton"); 
+  menuButton.rect = menuButton.el.getBoundingClientRect();
+  menuButton.dwell=false;
+
+}
+
+function checkMenuButton(){
+  var margin = 100;
+  if(gazePosition.x > (menuButton.rect.left-margin)
+          && gazePosition.y < menuButton.rect.top + menuButton.rect.height+margin){
+            //Gazing
+            if(menuButton.dwell){
+              //No change
+
+            } else{
+              menuButton.dwell=true;
+              menuButton.el.className = "menuButtonGazing";
+              menuButton.dwellTimeout = setTimeout("menuButtonFunction()" , 3000);
+            }
+          } else {
+            //Not Gazing
+            if(menuButton.dwell){
+              menuButton.dwell=false;
+              menuButton.el.className="";
+               clearTimeout(menuButton.dwellTimeout);
+            }
+          }
+}
+
+function menuButtonFunction(){
+  if(LOGGING){
+    saveLog();
+  }
+  ipc.send('menu');
+}
+
+
+var fixated = false;
+var fixation = {x:undefined, y:undefined};
+
+//Checks whether we're in a fixation or a saccade, updates globals
+function checkFixation(){
+  //Velocity threshold, will need to be adjusted based on distance & screen size
+  var threshold=25;
+  var vX = gazePosition.x-lastGazePosition.x;
+  var vY = gazePosition.y-lastGazePosition.y;
+  var velocity = v_Magnitude(vX, vY);
+  if(velocity<threshold){
+    //Fixated
+    if(!fixated){
+      fixated = true;
+      fixation.x = gazePosition.x;
+      fixation.y = gazePosition.y;
+
+      if(LOGGING){log += Date.now()+','+fixation.x+ "/"+fixation.y+", "};
+      testCanvas_renderPoint(fixation.x,fixation.y,"red");  
+      
+      if(renderPoints){
+        updateVectorW();
+      }
+ 
+    }
+  } else{
+    //Saccading
+    
+    testCanvas_renderVector(fixation.x, fixation.y, gazePosition.x, gazePosition.y, "blue");
+  
+    if(fixated){
+      fixated = false;
+      if(LOGGING){log += Date.now()+",Fixation Ended\n"};
+    }
+  }
+}
+
+//Updated if fixation or POI changes
+var W = {x:undefined, y:undefined};
+function updateVectorW(){
+  //Last fixation point -> current POI
+  W.x = paintingInfo.gazePoints[currentGazePoint].x*renderedScaleFactor - (fixation.x-canvasMargin);
+  W.y = paintingInfo.gazePoints[currentGazePoint].y*renderedScaleFactor - fixation.y;
+ 
+  testCanvas_renderVector(fixation.x, fixation.y, (paintingInfo.gazePoints[currentGazePoint].x*renderedScaleFactor)+canvasMargin, paintingInfo.gazePoints[currentGazePoint].y*renderedScaleFactor, "green");
+}
+
+//Called by saccadic masking
+var V = {x:undefined, y:undefined};
+function updateVectorV(){
+  //Last fixation point -> current gaze point
+  V.x = gazePosition.x - fixation.x;
+  V.y = gazePosition.y - fixation.y;
+ 
+}
+
+//Saccadic masking should be called per tick
+function saccadicMasking(){
+  if(renderPoints&!fixated){
+    updateVectorV();
+    var thetaThreshold = 0.17;    //radians
+    var theta = Math.acos( (V.x*W.x + V.y*W.y) / (v_Magnitude(V.x,V.y) * v_Magnitude(W.x,W.y)) ); //radians
+    //if theta is less that angle threshold, hide Poi.
+    if(theta < thetaThreshold){
+      //Saccading, towards POI  
+      if(renderPointsVisual){
+        printDebug("Saccade towards Gaze Point. Hiding");
+        renderPointsVisual = false; //Hide Gazepoints for 3 seconds
+        setTimeout(function() { renderPointsVisual = true; }, 3000);
+      }    
+    } else {
+      //Saccading, not towards POI
+    }
+  } else {
+    //Fixated
+  }
+}
+
+function v_Magnitude(x,y){
+   return Math.sqrt(Math.pow(x,2) + Math.pow(y,2));
+}
+
+function testCanvas_renderPoint(x,y,colour){
+  if(!DEBUG_OVERLAY){return;}
+  var testCanvas = document.getElementById("testCanvas"),
+  testCtx = testCanvas.getContext("2d");
+  testCtx.fillStyle = colour;
+  testCtx.fillRect(x,y,10,10);
+}
+
+function testCanvas_renderVector(begin_x, begin_y, end_x, end_y, colour){
+  if(!DEBUG_OVERLAY){return;}
+  var testCanvas = document.getElementById("testCanvas"),
+  testCtx = testCanvas.getContext("2d");
+  testCtx.strokeStyle = colour;
+  testCtx.beginPath();
+  testCtx.moveTo(begin_x, begin_y);
+  testCtx.lineTo(end_x, end_y);
+  testCtx.stroke();
+}
+
+function testCanvas_clear(){
+  if(!DEBUG_OVERLAY){return;}
+  var testCanvas = document.getElementById("testCanvas"),
+    testCtx = testCanvas.getContext("2d");
+    testCtx.clearRect(0,0,testCanvas.width,testCanvas.height);
+}
+
+function printDebug(message){
+  if(LOGGING){
+    infoLog+=Date.now()+', '+message+"\n";
+  }
+  if(!DEBUG){return;}
+  console.log(message);
+}
+
+
+function debug(){
+  DEBUG = true;
+}
+
+
+function debugOverlay(){
+  DEBUG_OVERLAY=true;
+  document.getElementById("testCanvas").style.display="inline";
+}
+
+window.setInterval(function(){
+  testCanvas_clear();
+}, 10000);
+
+
+function saveLog(){
+  var fs = require('fs');
+  try { fs.writeFileSync('logs/'+Date.now()+'.txt', log, 'utf-8'); }
+  catch(e) { alert('Failed to save log'+e); }
+
+  try { fs.writeFileSync('logs/'+Date.now()+'_info.txt', infoLog, 'utf-8'); }
+  catch(e) { alert('Failed to save info log!'+e); }
+}
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    body{
+      background:black;
+      font-family: Trebuchet MS;
+      margin:0;
+      cursor: none;
+    }
+    .paintingSelected {
+    }
+    .paintingSelected:before{
+      position:absolute;
+      bottom:0;
+      left:0%;
+      width:100%;
+      height:10px;
+      background:rgba(0,196,255,1);
+      display:block;
+      content:'';
+      z-index:2;
+    }
+
+    .gazeIndicator{
+      position:relative;
+    }
+    .gazeIndicator:after{
+      position:absolute;
+      bottom:0;
+      left:0%;
+      width:0;
+      height:10px;
+      background:rgba(0,196,255,1);
+      display:block;
+      content:'';
+      transition: width 2s ease-in-out;
+    }
+
+    .gazeIndicatorGazing .item_bg {
+      -webkit-filter: blur(0px) !important;
+      transition: 0.5s filter linear;
+    }
+
+    .gazeIndicatorGazing:after{
+      width:100%;
+    }
+
+
+    #columnsContainer{
+      display: flex;
+      flex: 1;
+    }
+
+    #gridContainer{
+      flex: 1;
+      order: 2;
+      display:grid;
+      grid-template-rows: 39% 39% 19%;
+      grid-template-columns: 49% 49%;
+      grid-column-gap: 10px;
+      grid-row-gap: 10px;
+      margin-top:12px;
+    }
+    #confirmButton{
+    
+      font-size: 32pt;
+      text-align:center;
+      background:#1f1f1f;
+      color:white;
+      grid-column: span 2;
+      height:100%;
+
+       display: flex;
+      justify-content:center;
+      align-content:center;
+      flex-direction:column; 
+    }
+    .item{
+      position:relative;
+      overflow:hidden;
+    }
+
+    .item_bg{
+      width:100%;
+      height:100%;
+      position:absolute;
+      filter: blur(5px);
+      background-repeat:no-repeat;
+      background-position: center center;
+      background-size:cover;
+    }
+
+    .item_content{
+      width:100%;
+      color:white;
+      background-color:rgba(0, 0, 0, 0.5);
+      padding:20px;
+      bottom:10px;
+      position:absolute;
+    }
+    .item_title{
+      font-size:20pt;
+
+    }
+    .item_author{
+      margin-bottom: 10px;
+      font-size:28pt;
+      text-transform: uppercase;
+    }
+    .item_medium{
+      font-size:20pt;
+    }
+    .scrollButton{
+      width: 10%;
+    }
+    #container{
+      display: flex;
+      min-height: 100vh;
+      flex-direction: column;
+    }
+    
+  </style>
+</head>
+<body>
+
+  <div id="container">
+    <div id="columnsContainer">
+      <div class="scrollButton" style="order:l;">
+      </div>
+        <div id="gridContainer">
+
+          <div class="gazeIndicator item"  gazeOverClass='gazeIndicatorGazing' gazeAware>
+            <div class="item_bg"></div>
+            <div class="item_content" >
+              <div class = "item_author">
+              </div>
+              <div class="item_title">
+              </div>
+              <div class = "item_medium">
+              </div>
+            </div>
+          </div>
+          <div class="gazeIndicator item"  gazeOverClass='gazeIndicatorGazing' gazeAware>
+            <div class="item_bg"></div>
+            <div class="item_content" >
+              <div class = "item_author">
+              </div>
+              <div class="item_title">
+              </div>
+              <div class = "item_medium">
+              </div>
+            </div>
+          </div>
+          <div class="item gazeIndicator"  gazeOverClass='gazeIndicatorGazing' gazeAware>
+            <div class="item_bg"></div>
+            <div class="item_content">
+              <div class = "item_author">
+              </div>
+              <div class="item_title">
+              </div>
+              <div class = "item_medium">
+              </div>
+            </div>
+          </div>
+          <div class="item gazeIndicator"  gazeOverClass='gazeIndicatorGazing' gazeAware>
+            <div class="item_bg"></div>
+            <div class="item_content" >
+              <div class = "item_author">
+              </div>
+              <div class="item_title">
+              </div>
+              <div class = "item_medium">
+              </div>
+            </div>
+          </div>
+          <div id = "confirmButton" gazeAction = "openPainting()" gazeOverClass='gazeIndicatorGazing' gazeAware>
+            <div>
+              SELECT A PAINTING
+            </div>
+          </div>
+        </div>
+
+
+      <div class="scrollButton" style="order:3;">
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+  var artOrder = [0,1,2,3]; 
+
+  var artDesign = {"dali": "1","ernst":"2","miro":"3","picasso":"4"};
+
+  var painting = undefined;
+  var paintings =[];
+
+  loadPaintings();
+  setMenu(0);
+
+
+  //Get Gaze coordinates
+  var ipc = require('electron').ipcRenderer;
+    ipc.on('gaze-pos', (event, arg) => {
+      if(arg.timestamp )
+      gazePosition.x = arg.x;
+      gazePosition.y = arg.y;
+    });
+    var gazePosition = {x : 0, y: 0};
+    var gazeAwareElements = [];
+
+    function setupGaze(){
+      var arr_elms = [];
+      arr_elms = document.body.getElementsByTagName("*");
+      var elms_len = arr_elms.length;
+
+      for (var i = 0; i < elms_len; i++) {
+        if(arr_elms[i].getAttribute("gazeAware") != null){
+
+         gazeAwareElements.push({'element': arr_elms[i], 'dwell':false, 'dwellTimeout': null});
+         //console.log( arr_elms[i].getBoundingClientRect());
+         //console.log({'element': arr_elms[i], 'dwell':false, 'dwellTimeout': null});
+        }
+      }
+    }
+
+    setupGaze();
+    setInterval(updateGaze, 10);
+
+    function openPainting(){
+      if (painting != undefined){
+        ipc.send('open', painting, artDesign[painting]);
+      }
+    }
+
+    function setPainting(thisPainting){
+      painting = thisPainting;
+      console.log('setting: '+thisPainting);
+      for(var i=0;i<paintings.length;i++){
+        if(paintings[i].id==thisPainting){
+          document.getElementById("confirmButton").innerHTML = '<div><font size="6pt">LOOK HERE TO VIEW</font><br><b>'+paintings[i].title+'</b></div>';
+          document.getElementById("confirmButton").style.background = "#252525";
+        }
+      } 
+      document.getElementById("confirmButton").classList = "gazeIndicator";
+      var items = document.getElementsByClassName('item');
+      for (var i = 0; i < items.length; i++) {
+        items[i].classList.remove("paintingSelected");
+      }
+      var thisItem = document.getElementById(painting);
+      thisItem.className += " paintingSelected";
+    }
+
+ 
+
+    function updateGaze() {
+      for (var i = 0; i < gazeAwareElements.length; i++) {
+        var el = gazeAwareElements[i].element;
+        var elRect = el.getBoundingClientRect();
+        var hoverClass = el.getAttribute("gazeOverClass");
+        var actionFunction = el.getAttribute("gazeAction");
+
+        if(gazePosition.x > elRect.left
+          && gazePosition.x < elRect.left + elRect.width
+          && gazePosition.y > elRect.top
+          && gazePosition.y < elRect.top + elRect.height){
+            //Gazing
+            if(gazeAwareElements[i].dwell){
+              //No change
+            } else{
+              gazeAwareElements[i].dwell=true;
+              el.className += " " + hoverClass;
+              gazeAwareElements[i].dwellTimeout = setTimeout(actionFunction , 2000);
+            }
+          } else {
+            //Not Gazing
+            if(gazeAwareElements[i].dwell){
+              gazeAwareElements[i].dwell=false;
+              el.classList.remove(hoverClass);
+               clearTimeout(gazeAwareElements[i].dwellTimeout);
+            }
+          }
+      }
+    }
+
+    
+    function setMenu(index){
+      /*
+      var items = document.getElementsByClassName('item');
+      for (var i = 0; i < items.length; i++) {
+        if(paintings[i+index]!=undefined){
+            items[i].id = paintings[i+index].id;
+            items[i].style.backgroundImage = 'url('+paintings[i+index].image+')';
+            items[i].setAttribute("gazeAction", "setPainting('" + paintings[i+index].id + "')" );
+
+            var title = items[i].getElementsByClassName("item_title")[0];
+            var artist = items[i].getElementsByClassName("item_author")[0];
+            var medium = items[i].getElementsByClassName("item_medium")[0];
+            title.innerHTML = paintings[i+index].title + ", " + paintings[i+index].year;
+            artist.innerHTML = paintings[i+index].artist;
+            medium.innerHTML = paintings[i+index].medium;
+        }
+      } */
+ 
+      var items = document.getElementsByClassName('item');
+        for(var j=0;j<artOrder.length;j++){
+          var i = artOrder[j];
+          items[i].id = paintings[j].id;
+          //items[i].style.backgroundImage = 'url('+paintings[j].image+')';
+          items[i].getElementsByClassName('item_bg')[0].style.backgroundImage ='url('+paintings[j].image+')'; 
+          items[i].setAttribute("gazeAction", "setPainting('" + paintings[j].id + "')" );
+
+          var title = items[i].getElementsByClassName("item_title")[0];
+          var artist = items[i].getElementsByClassName("item_author")[0];
+          var medium = items[i].getElementsByClassName("item_medium")[0];
+          title.innerHTML = paintings[j].title + ", " + paintings[j].year;
+          artist.innerHTML = paintings[j].artist;
+          medium.innerHTML = paintings[j].medium;
+          
+        }
+    }
+
+    function loadPaintings(){
+      var normalizedPath = require("path").join(__dirname, "paintings");
+
+      require("fs").readdirSync(normalizedPath).forEach(function(file) {
+        paintingObject = require("./paintings/" + file);
+        var fileName = file.replace('.json','');
+        paintingObject.id=fileName;
+        paintings.push(paintingObject);
+      });
+
+    }
+  </script>
+</body>

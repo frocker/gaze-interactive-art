@@ -1,0 +1,11 @@
+C:\Users\Felix\Documents\GitHub\gaze-interactive-art\ConsoleApp1\ConsoleApp1\bin\x86\Release\Properties\AssemblyInfo.cs
+C:\Users\Felix\Documents\GitHub\gaze-interactive-art\ConsoleApp1\ConsoleApp1\bin\x86\Release\Tobii.EyeX.Client.dll
+C:\Users\Felix\Documents\GitHub\gaze-interactive-art\ConsoleApp1\ConsoleApp1\bin\x86\Release\ConsoleApp1.exe.config
+C:\Users\Felix\Documents\GitHub\gaze-interactive-art\ConsoleApp1\ConsoleApp1\bin\x86\Release\ConsoleApp1.exe
+C:\Users\Felix\Documents\GitHub\gaze-interactive-art\ConsoleApp1\ConsoleApp1\bin\x86\Release\ConsoleApp1.pdb
+C:\Users\Felix\Documents\GitHub\gaze-interactive-art\ConsoleApp1\ConsoleApp1\bin\x86\Release\Tobii.Interaction.Model.dll
+C:\Users\Felix\Documents\GitHub\gaze-interactive-art\ConsoleApp1\ConsoleApp1\bin\x86\Release\Tobii.Interaction.Net.dll
+C:\Users\Felix\Documents\GitHub\gaze-interactive-art\ConsoleApp1\ConsoleApp1\obj\x86\Release\ConsoleApp1.csproj.CoreCompileInputs.cache
+C:\Users\Felix\Documents\GitHub\gaze-interactive-art\ConsoleApp1\ConsoleApp1\obj\x86\Release\ConsoleApp1.exe
+C:\Users\Felix\Documents\GitHub\gaze-interactive-art\ConsoleApp1\ConsoleApp1\obj\x86\Release\ConsoleApp1.pdb
+C:\Users\Felix\Documents\GitHub\gaze-interactive-art\ConsoleApp1\ConsoleApp1\obj\x86\Release\ConsoleApp1.csprojResolveAssemblyReference.cache
