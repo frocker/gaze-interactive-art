@@ -1,0 +1,24 @@
+1524917747416, 1524917747416
+1524917747416, SGD: true AUDIO: false
+1524917747416, miro
+1524917747419, Viewport: width: 1920 Height: 1080
+1524917747419, Canvas: width: 1529 Height: 1080 Margin: 195.5
+1524917754209, Saccade towards Gaze Point. Hiding
+1524917755183, Current Gazpoint viewed (0)
+1524917765184, Current Gaze Point: 1
+1524917766343, Saccade towards Gaze Point. Hiding
+1524917769853, Saccade towards Gaze Point. Hiding
+1524917770816, Current Gazpoint viewed (1)
+1524917780816, Current Gaze Point: 2
+1524917781866, Saccade towards Gaze Point. Hiding
+1524917784798, Current Gazpoint viewed (2)
+1524917794799, Current Gaze Point: 3
+1524917795867, Saccade towards Gaze Point. Hiding
+1524917800032, Saccade towards Gaze Point. Hiding
+1524917801198, Current Gazpoint viewed (3)
+1524917811198, Current Gaze Point: 4
+1524917812323, Saccade towards Gaze Point. Hiding
+1524917816609, Saccade towards Gaze Point. Hiding
+1524917820939, Saccade towards Gaze Point. Hiding
+1524917821996, Current Gazpoint viewed (4)
+1524917831996, All gaze points viewed.

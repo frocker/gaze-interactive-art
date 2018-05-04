@@ -1,0 +1,21 @@
+1524686770177, 1524686770177
+1524686770177, SGD: false AUDIO: false
+1524686770177, miro
+1524686770179, Viewport: width: 1920 Height: 1080
+1524686770180, Canvas: width: 1529 Height: 1080 Margin: 195.5
+1524686776467, Saccade towards Gaze Point. Hiding
+1524686780247, Saccade towards Gaze Point. Hiding
+1524686784221, Saccade towards Gaze Point. Hiding
+1524686794673, Saccade towards Gaze Point. Hiding
+1524686810195, Saccade towards Gaze Point. Hiding
+1524686820843, Saccade towards Gaze Point. Hiding
+1524686827971, Saccade towards Gaze Point. Hiding
+1524686835898, Saccade towards Gaze Point. Hiding
+1524686848213, Saccade towards Gaze Point. Hiding
+1524686851911, Saccade towards Gaze Point. Hiding
+1524686856152, Saccade towards Gaze Point. Hiding
+1524686859594, Saccade towards Gaze Point. Hiding
+1524686862703, Saccade towards Gaze Point. Hiding
+1524686865734, Saccade towards Gaze Point. Hiding
+1524686868754, Saccade towards Gaze Point. Hiding
+1524686871974, Saccade towards Gaze Point. Hiding

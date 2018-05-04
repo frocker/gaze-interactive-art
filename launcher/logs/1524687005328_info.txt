@@ -1,0 +1,17 @@
+1524686904659, 1524686904659
+1524686904659, SGD: true AUDIO: false
+1524686904659, picasso
+1524686904662, Viewport: width: 1920 Height: 1080
+1524686904662, Canvas: width: 1920 Height: 869 Margin: 0
+1524686910153, Non Current Gazepoint viewed (0)
+1524686920153, Current Gaze Point: 2
+1524686920230, Saccade towards Gaze Point. Hiding
+1524686923342, Saccade towards Gaze Point. Hiding
+1524686931285, Current Gazpoint viewed (2)
+1524686941286, Current Gaze Point: 3
+1524686945826, Saccade towards Gaze Point. Hiding
+1524686947400, Current Gazpoint viewed (3)
+1524686957400, Current Gaze Point: 4
+1524686957823, Saccade towards Gaze Point. Hiding
+1524686959817, Current Gazpoint viewed (4)
+1524686969818, All gaze points viewed.

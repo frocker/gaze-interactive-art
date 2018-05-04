@@ -1,0 +1,19 @@
+1524916732747, 1524916732747
+1524916732747, SGD: false AUDIO: true
+1524916732747, dali
+1524916732750, Viewport: width: 1920 Height: 1080
+1524916732750, Canvas: width: 1500 Height: 1080 Margin: 210
+1524916737729, Non Current Gazepoint viewed (0)
+1524916748452, Saccade towards Gaze Point. Hiding
+1524916752117, Saccade towards Gaze Point. Hiding
+1524916755129, Saccade towards Gaze Point. Hiding
+1524916758528, Non Current Gazepoint viewed (0)
+1524916770019, Saccade towards Gaze Point. Hiding
+1524916774127, Current Gazpoint viewed (0)
+1524916783755, Current Gaze Point: 1
+1524916784064, Saccade towards Gaze Point. Hiding
+1524916785226, Current Gazpoint viewed (1)
+1524916792755, Current Gaze Point: 2
+1524916797288, Saccade towards Gaze Point. Hiding
+1524916803584, Saccade towards Gaze Point. Hiding
+1524916819173, Saccade towards Gaze Point. Hiding

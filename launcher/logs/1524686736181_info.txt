@@ -1,0 +1,16 @@
+1524686636429, 1524686636429
+1524686636429, SGD: false AUDIO: true
+1524686636429, ernst
+1524686636432, Viewport: width: 1920 Height: 1080
+1524686636432, Canvas: width: 929 Height: 1080 Margin: 495.5
+1524686641397, Non Current Gazepoint viewed (0)
+1524686657467, Saccade towards Gaze Point. Hiding
+1524686658996, Current Gazpoint viewed (0)
+1524686670532, Current Gaze Point: 2
+1524686672611, Non Current Gazepoint viewed (2)
+1524686688623, Saccade towards Gaze Point. Hiding
+1524686697011, Non Current Gazepoint viewed (2)
+1524686709963, Saccade towards Gaze Point. Hiding
+1524686717615, Saccade towards Gaze Point. Hiding
+1524686725413, Saccade towards Gaze Point. Hiding
+1524686732342, Saccade towards Gaze Point. Hiding

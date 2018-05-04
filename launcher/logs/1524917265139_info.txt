@@ -1,0 +1,17 @@
+1524917166222, 1524917166222
+1524917166222, SGD: false AUDIO: false
+1524917166222, picasso
+1524917166224, Viewport: width: 1920 Height: 1080
+1524917166225, Canvas: width: 1920 Height: 869 Margin: 0
+1524917178522, Saccade towards Gaze Point. Hiding
+1524917187359, Saccade towards Gaze Point. Hiding
+1524917196065, Saccade towards Gaze Point. Hiding
+1524917199741, Saccade towards Gaze Point. Hiding
+1524917205059, Saccade towards Gaze Point. Hiding
+1524917209234, Saccade towards Gaze Point. Hiding
+1524917219482, Saccade towards Gaze Point. Hiding
+1524917223357, Saccade towards Gaze Point. Hiding
+1524917226477, Saccade towards Gaze Point. Hiding
+1524917232040, Saccade towards Gaze Point. Hiding
+1524917235550, Saccade towards Gaze Point. Hiding
+1524917261886, Saccade towards Gaze Point. Hiding

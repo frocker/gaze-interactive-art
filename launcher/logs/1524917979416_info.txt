@@ -1,0 +1,13 @@
+1524917887923, 1524917887923
+1524917887923, SGD: false AUDIO: false
+1524917887923, picasso
+1524917887926, Viewport: width: 1920 Height: 1080
+1524917887927, Canvas: width: 1920 Height: 869 Margin: 0
+1524917898968, Saccade towards Gaze Point. Hiding
+1524917923651, Saccade towards Gaze Point. Hiding
+1524917931634, Saccade towards Gaze Point. Hiding
+1524917945303, Saccade towards Gaze Point. Hiding
+1524917955417, Saccade towards Gaze Point. Hiding
+1524917963067, Saccade towards Gaze Point. Hiding
+1524917966332, Saccade towards Gaze Point. Hiding
+1524917971773, Saccade towards Gaze Point. Hiding

@@ -1,0 +1,20 @@
+1524917569491, 1524917569490
+1524917569491, SGD: false AUDIO: true
+1524917569491, ernst
+1524917569494, Viewport: width: 1920 Height: 1080
+1524917569494, Canvas: width: 929 Height: 1080 Margin: 495.5
+1524917579273, Non Current Gazepoint viewed (0)
+1524917594007, Saccade towards Gaze Point. Hiding
+1524917594872, Current Gazpoint viewed (0)
+1524917606414, Current Gaze Point: 1
+1524917609433, Saccade towards Gaze Point. Hiding
+1524917610472, Current Gazpoint viewed (1)
+1524917622455, Current Gaze Point: 3
+1524917626323, Saccade towards Gaze Point. Hiding
+1524917633261, Saccade towards Gaze Point. Hiding
+1524917636305, Saccade towards Gaze Point. Hiding
+1524917640722, Non Current Gazepoint viewed (3)
+1524917654658, Saccade towards Gaze Point. Hiding
+1524917658989, Saccade towards Gaze Point. Hiding
+1524917659670, Current Gazpoint viewed (3)
+1524917666766, All gaze points viewed.

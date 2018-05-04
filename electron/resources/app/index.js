@@ -5,18 +5,15 @@ let mainWindow = undefined;
 
 var ipc = require('electron').ipcMain;
 
-/*Server Stuff*/
+//Client set up
 var PORT = 33333;
 var HOST = '127.0.0.1';
-
 var dgram = require('dgram');
 var server = dgram.createSocket('udp4');
-
 var previousTimestamp = 0;
 
 server.on('listening', function () {
     var address = server.address();
-    //console.log('UDP Server listening on ' + address.address + ":" + address.port);
 });
 
 server.on('message', function (message, remote) {
@@ -25,8 +22,10 @@ server.on('message', function (message, remote) {
 
 function parseMessage(message){
   var messageObj = JSON.parse(message);
+  //Drop packets recieved out of order
   if(messageObj.timestamp>previousTimestamp){
     if(mainWindow !== undefined){
+      //Send gaze data to open window
       mainWindow.webContents.send('gaze-pos', messageObj);
     }
     previousTimestamp = messageObj.timestamp;
@@ -42,7 +41,6 @@ app.on('ready', () => {
     show: false
   }
   );
-  //mainWindow.setMenu(null);
   mainWindow.setFullScreen(true);
   mainWindow.loadURL(path.join('file://', __dirname, 'menu.html'));
   mainWindow.webContents.on('did-finish-load', function() {
@@ -51,11 +49,9 @@ app.on('ready', () => {
 });
 
 ipc.on('open', function (e, painting, design) {
-  //console.log("Opening: " + painting + ", Design: "+design);
   mainWindow.loadURL(path.join('file://', __dirname, 'index.html?painting='+painting+"&design="+design));
 });
 
 ipc.on('menu', function (e) {
- //console.log("Returning to Menu: ");
   mainWindow.loadURL(path.join('file://', __dirname, 'menu.html'));
 });

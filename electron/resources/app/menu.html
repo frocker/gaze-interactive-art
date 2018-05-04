@@ -191,7 +191,7 @@
   <script>
   var artOrder = [0,1,2,3]; 
 
-  var artDesign = {"dali": "1","ernst":"2","miro":"3","picasso":"4"};
+  var artDesign = {"dali": "4","ernst":"3","miro":"2","picasso":"1"};
 
   var painting = undefined;
   var paintings =[];
@@ -201,26 +201,26 @@
 
 
   //Get Gaze coordinates
-  var ipc = require('electron').ipcRenderer;
+    var ipc = require('electron').ipcRenderer;
     ipc.on('gaze-pos', (event, arg) => {
-      if(arg.timestamp )
-      gazePosition.x = arg.x;
-      gazePosition.y = arg.y;
+      if(arg.timestamp){
+        gazePosition.x = arg.x;
+        gazePosition.y = arg.y;
+      }     
     });
     var gazePosition = {x : 0, y: 0};
     var gazeAwareElements = [];
 
     function setupGaze(){
+      //Get all elements on page
       var arr_elms = [];
       arr_elms = document.body.getElementsByTagName("*");
       var elms_len = arr_elms.length;
 
+      //Add all gazeaware elements to global object
       for (var i = 0; i < elms_len; i++) {
         if(arr_elms[i].getAttribute("gazeAware") != null){
-
          gazeAwareElements.push({'element': arr_elms[i], 'dwell':false, 'dwellTimeout': null});
-         //console.log( arr_elms[i].getBoundingClientRect());
-         //console.log({'element': arr_elms[i], 'dwell':false, 'dwellTimeout': null});
         }
       }
     }
@@ -258,29 +258,29 @@
       for (var i = 0; i < gazeAwareElements.length; i++) {
         var el = gazeAwareElements[i].element;
         var elRect = el.getBoundingClientRect();
-        var hoverClass = el.getAttribute("gazeOverClass");
+        var gazeClass = el.getAttribute("gazeOverClass");
         var actionFunction = el.getAttribute("gazeAction");
 
         if(gazePosition.x > elRect.left
           && gazePosition.x < elRect.left + elRect.width
           && gazePosition.y > elRect.top
           && gazePosition.y < elRect.top + elRect.height){
-            //Gazing
-            if(gazeAwareElements[i].dwell){
-              //No change
-            } else{
-              gazeAwareElements[i].dwell=true;
-              el.className += " " + hoverClass;
-              gazeAwareElements[i].dwellTimeout = setTimeout(actionFunction , 2000);
-            }
-          } else {
-            //Not Gazing
-            if(gazeAwareElements[i].dwell){
-              gazeAwareElements[i].dwell=false;
-              el.classList.remove(hoverClass);
-               clearTimeout(gazeAwareElements[i].dwellTimeout);
-            }
+          //Gazing
+          if(gazeAwareElements[i].dwell){
+            //Already gazing, no change
+          } else{
+            gazeAwareElements[i].dwell=true;
+            el.className += " " + gazeClass;
+            gazeAwareElements[i].dwellTimeout = setTimeout(actionFunction , 2000);
           }
+        } else {
+          //Not Gazing
+          if(gazeAwareElements[i].dwell){
+            gazeAwareElements[i].dwell=false;
+            el.classList.remove(gazeClass);
+             clearTimeout(gazeAwareElements[i].dwellTimeout);
+          }
+        }
       }
     }
 
